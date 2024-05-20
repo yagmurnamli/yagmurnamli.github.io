@@ -1,0 +1,113 @@
+html, body {
+    margin: 0px;
+    background-color: #0e1111;
+    overflow: hidden; /* Hide scrollbars */
+}
+
+@font-face {
+    font-family: 'Maleri';
+    src: url(/font/MaleriTrialSN-Book.woff2);
+}
+
+@font-face {
+  font-family: 'Garam';
+  src: url(/font/EBGaramond08-Regular.otf);
+}
+
+@font-face {
+    font-family: 'Inter';
+    src: url(/font/Inter-Regular.ttf);
+}
+
+
+.textContainer {
+    color: #BCC1C8;
+    font-family: Maleri;
+    font-size: 20vh;
+    text-align: center;
+
+}
+
+.answerContainer {
+    display: flex;
+    justify-content: center;
+    flex-direction: column;
+    color : #FB6072;
+    font-family: Inter;
+    font-size: 2vh;
+    text-align: center;
+}
+
+#names {
+  color: #BCC1C8;
+  font-family: Garam;
+  font-size: 2.4vh;
+  text-align: center;
+  margin-top: -8vh;
+}
+
+#title {
+  margin-bottom: 5vh;
+
+}
+
+/*
+#bg {
+  width: 130%;
+  height: 130%;
+  position: absolute;
+  top: 00px;
+  left: 30px;
+}
+
+img {
+  object-fit: contain;
+  max-width:100%;
+  max-height:100%;
+}*/
+
+
+
+/* CSS */
+.button-55 {
+  margin-top: 18vh;
+  align-self: center;
+  background-color:  #0e1111;
+  background-image: none;
+  background-position: 0 90%;
+  background-repeat: repeat no-repeat;
+  background-size: 4px 3px;
+  border-radius: 15px 225px 255px 15px 15px 255px 225px 15px;
+  border-style: solid #FB6072;
+  border-width: 2px;
+  /*box-shadow: #BCC1C8 15px 28px 25px -18px;*/
+  box-sizing: border-box;
+  color: #BCC1C8;
+  cursor: pointer;
+  display: inline-block;
+  font-family: Maleri;
+  font-size: 3vh;
+  line-height: 23px;
+  outline: none;
+  padding: .75rem;
+  text-decoration: none;
+  transition: all 235ms ease-in-out;
+  border-bottom-left-radius: 15px 255px;
+  border-bottom-right-radius: 225px 15px;
+  border-top-left-radius: 255px 15px;
+  border-top-right-radius: 15px 225px;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: manipulation;
+}
+
+.button-55:hover {
+  box-shadow: rgba(0, 0, 0, .3) 2px 8px 8px -5px;
+  transform: translate3d(0, 2px, 0);
+  color: #FB6072;
+}
+
+.button-55:focus {
+  box-shadow: rgba(0, 0, 0, .3) 2px 8px 4px -6px;
+}
+

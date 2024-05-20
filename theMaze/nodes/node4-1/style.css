@@ -1,0 +1,87 @@
+html, body {
+    margin: 0px;
+    background-color: #0e1111;
+}
+
+.textContainer {
+    color: #BCC1C8;
+    font-family: Garam;
+    font-size: 3.8vh;
+    width: 50%;
+    position: absolute;
+    right: 10vh;
+    top: 10vh;
+    columns: 2; 
+    column-fill: balance;
+}
+
+.answerContainer {
+    position: absolute;
+    bottom: 0;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
+    color : #BCC1C8;
+    width: 99%;
+    height: 10vh;
+    font-family: Maleri;
+    font-size: 3.3vh;
+}
+
+@font-face {
+    font-family: 'Maleri';
+    src: url(/font/MaleriTrialSN-Book.woff2);
+}
+
+
+@font-face {
+    font-family: 'Garam';
+    src: url(/font/EBGaramond08-Regular.otf);
+}
+
+@font-face {
+    font-family: 'GaramI';
+    src: url(/font/EBGaramond08-Italic.otf);
+}
+
+.itl {
+    font-family: GaramI;
+    font-style: italic;
+}
+
+.answerContainer p:before{
+    content: "¶ \00a0 ";
+}
+
+p { 
+    margin: 0;
+}
+
+img {
+    object-fit: contain;
+    min-height: 100%;
+    max-width: 100%;
+}
+
+.img_wrapper {
+    width: 48vw;
+    height: auto;
+    position: absolute;
+    left: 0;
+    top: 30%;
+}
+
+.answerContainer>p:hover{
+    color : #FB6072;
+    transition: ease-in-out 1s;
+}
+
+#timer {
+    font-family: Maleri;
+    font-size: 15vh;
+    left: 10vh;
+    top: 25vh;
+    padding: 4vh;
+    border: 3px solid #BCC1C8;
+    color: #FB6072;
+}

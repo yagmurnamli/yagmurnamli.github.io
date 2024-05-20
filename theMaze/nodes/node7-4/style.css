@@ -1,0 +1,118 @@
+html, body {
+    margin: 0px;
+    background-color: #0e1111;
+}
+
+
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+  ::-webkit-scrollbar-button {
+    width: 0px;
+    height: 0px;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: #292929;
+    border: 0px none #ffffff;
+    border-radius: 50px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: #383838;
+  }
+  ::-webkit-scrollbar-thumb:active {
+    background: #363636;
+  }
+  ::-webkit-scrollbar-track {
+    background: #ffffff;
+    border: 0px none #ffffff;
+    border-radius: 33px;
+  }
+  ::-webkit-scrollbar-track:hover {
+    background: #ffffff;
+  }
+  ::-webkit-scrollbar-track:active {
+    background: #ffffff;
+  }
+  ::-webkit-scrollbar-corner {
+    background: transparent;
+  }
+
+.textContainer {
+    color: #BCC1C8;
+    font-family: Garam;
+    font-size: 3.8vh;
+    width: 75%;
+    position: absolute;
+    left: 10vh;
+    bottom: 24vh;
+    columns: 2; 
+    column-fill: balance;
+}
+
+.answerContainer {
+    position: absolute;
+    bottom: 0;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
+    color : #BCC1C8;
+    width: 99%;
+    height: 10vh;
+    font-family: Maleri;
+    font-size: 3.3vh;
+}
+
+.answerContainer>p:hover{
+    color: #FB6072;
+    transition: ease-in-out 1s;
+}
+
+@font-face {
+    font-family: 'Maleri';
+    src: url(/font/MaleriTrialSN-Book.woff2);
+}
+
+
+@font-face {
+    font-family: 'Garam';
+    src: url(/font/EBGaramond08-Regular.otf);
+}
+
+@font-face {
+    font-family: 'GaramI';
+    src: url(/font/EBGaramond08-Italic.otf);
+}
+
+.img_wrapper {
+    width: 150%;
+    height: 50vh;
+    position: absolute;
+    top: 5%;
+
+    overflow-y: hidden;
+
+}
+
+img {
+    object-fit: cover;
+    min-height: 100%;
+    max-width: 100%;
+    overflow-y: hidden;
+    overflow-x: scroll;
+    transform: scaleX(-1);
+}
+
+
+.itl {
+    font-family: GaramI;
+    font-style: italic;
+}
+
+.answerContainer p:before{
+    content: "¶ \00a0 ";
+}
+
+p { 
+    margin: 0;
+}
