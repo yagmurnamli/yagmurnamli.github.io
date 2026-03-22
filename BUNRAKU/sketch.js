@@ -91,7 +91,8 @@ function setup() {
   button.style("border", "none");
   button.style("cursor", "pointer");
   button.style("font-family", customFont);
-  button.position(width/2, height/2);
+  button.parent("canvas-container");
+  button.position(0, 0);
   button.mousePressed(openCurtains);
 
   // Pulse animation
