@@ -1,26 +1,19 @@
-/* Sayfa ve canvas genel ayarları */
 html, body {
   margin: 0;
   padding: 0;
   height: 100%;
-  background-color: #000000;
+  background-color: #000;
+}
+
+/* Ortalayan container */
+#canvas-container {
   display: flex;
-  justify-content: center;   /* canvas yatay ortalanır */
-  align-items: center;       /* canvas dikey ortalanır */
-  font-family: 'MaleriTrialSN', sans-serif; /* oyun fontu */
-  color: #fff;               /* yazılar beyaz */
-  overflow: hidden;          /* kaydırma çubuğunu gizle */
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
 }
 
-/* Fontu web sayfasında kullanmak için @font-face */
-@font-face {
-  font-family: 'MaleriTrialSN';
-  src: url('font/MaleriTrialSN-Book.otf') format('opentype');
-}
-
-/* Canvas’ı ortala ve responsive yap */
+/* Canvas */
 canvas {
   display: block;
-  max-width: 100%;
-  max-height: 100%;
 }
