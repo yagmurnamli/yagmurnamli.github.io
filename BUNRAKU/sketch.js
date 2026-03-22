@@ -17,13 +17,15 @@
 let sound;
 let video;
 let label = "waiting...";
-// Classifier
 let classifier;
 let modelURL = "https://teachablemachine.withgoogle.com/models/ZlwamfTxu/";
+
 // Images
 let img1, img2, img3, img4, cur1, cur2;
+
 // Button
 let button;
+
 // Curtains
 let cur1X, cur2X, targetCur1X, targetCur2X;
 let curtainSpeed = 2;
@@ -70,6 +72,9 @@ let titleFadeSpeed = 0;
 let startTypewriterTimer = 0;
 let typewriterDelay = 1500; // ms (1.5 saniye)
 
+// Classifier start kontrol
+let classifierStarted = false;
+
 function preload() {
   sound = new Audio('sound/Bunraku puppet theatre.mp3');
   classifier = ml5.imageClassifier(modelURL + "model.json");
@@ -88,7 +93,7 @@ function setup() {
   imageMode(CENTER);
 
   video = createCapture(VIDEO);
-  video.size(160, 120);
+  video.size(320, 240);
   video.hide();
 
   cur1X = width / 2;
@@ -96,6 +101,7 @@ function setup() {
   targetCur1X = cur1X;
   targetCur2X = cur2X;
 
+  // Start button
   button = createButton("START");
   button.size(150, 50);
   button.style("background-color", "#8b242c");
@@ -114,10 +120,9 @@ function setup() {
   styleSheet.type = "text/css";
   styleSheet.innerText = pulseAnimation;
   document.head.appendChild(styleSheet);
-
-  classifyVideo();
 }
 
+// Open curtains
 function openCurtains() {
   if (!curtainsOpen) {
     targetCur1X = -cur1.width / 2;
@@ -128,6 +133,7 @@ function openCurtains() {
   }
 }
 
+// Typewriter
 function typeWriter() {
   if (charIndex < fullText.length) {
     displayedText += fullText.charAt(charIndex);
@@ -138,6 +144,7 @@ function typeWriter() {
   }
 }
 
+// Classify video
 function classifyVideo() {
   classifier.classify(video, gotResults);
 }
@@ -148,7 +155,7 @@ function gotResults(error, results) {
     return;
   }
   label = results[0].label;
-  classifyVideo();
+  classifier.classify(video, gotResults); // sürekli sınıflandır
 }
 
 function draw() {
@@ -157,13 +164,20 @@ function draw() {
 
   scene1();
 
-  // --- PERDELER TAMAMEN AÇILDI MI? ---
+  // Perdeler tamamen açıldı mı?
   if (curtainsOpen && cur1X <= targetCur1X && cur2X >= targetCur2X) {
+
+    // Typewriter başlat
     if (startTypewriterTimer === 0) {
-      startTypewriterTimer = millis(); // Timer başlat
+      startTypewriterTimer = millis();
     } else if (!typewriterInterval && millis() - startTypewriterTimer >= typewriterDelay) {
-      // 1.5 saniye geçti, typewriter başlasın
       typewriterInterval = setInterval(typeWriter, typingSpeed);
+    }
+
+    // Classifier başlat
+    if (!classifierStarted) {
+      classifierStarted = true;
+      classifyVideo();
     }
   }
 
@@ -198,6 +212,7 @@ function draw() {
   image(video, 330, 250);
 }
 
+// SCENES
 function scene1() {
   background("#081010");
   if (cur1X > targetCur1X) cur1X -= curtainSpeed;
