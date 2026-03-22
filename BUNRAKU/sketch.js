@@ -1,8 +1,8 @@
 /* vcd436s24 - Project (4/4): Submission
   @yagmurnamli
-   last update: June 05
-   Project Name: "BUNRAKU"
-   Explanation: A Japanese puppet, Bunraku, is holding a key, can you take it or not? An interactive experience based on Teachable Machine and player gestures.
+  last update: March 22, 2026
+  Project Name: "BUNRAKU"
+  Explanation: A Japanese puppet, Bunraku, is holding a key, can you take it or not? An interactive experience based on Teachable Machine and player gestures.
 */
 
 let sound;
@@ -62,7 +62,7 @@ let startTypewriterTimer = 0;
 let typewriterDelay = 1500; // ms (1.5 saniye)
 
 function preload() {
-  sound = new Audio('sound/start.mp3');
+  sound = loadSound('sound/start.mp3'); // p5.js loadSound ile
   classifier = ml5.imageClassifier(modelURL + "model.json");
   img1 = loadImage("images/puppet1.png");
   img2 = loadImage("images/puppet2.png");
@@ -116,6 +116,11 @@ function openCurtains() {
     curtainsOpen = true;
     button.hide();
     titleFadeSpeed = 1.9;
+
+    // Kullanıcı etkileşimi olduğunda ses çal
+    if (sound && !sound.isPlaying()) {
+      sound.play();
+    }
   }
 }
 
@@ -144,7 +149,6 @@ function gotResults(error, results) {
 
 function draw() {
   background("#081010");
-  playSound();
 
   scene1();
 
@@ -158,13 +162,8 @@ function draw() {
     }
   }
 
-  if (titleOpacity <= 0) {
-    scene2();
-  }
-
-  if (typewriterFinished) {
-    scene3();
-  }
+  if (titleOpacity <= 0) scene2();
+  if (typewriterFinished) scene3();
 
   if (label === "reach" && millis() - reachStartTime >= 3000 && !reachSwitched) {
     reachSwitched = true;
@@ -189,6 +188,7 @@ function draw() {
   image(video, 330, 250);
 }
 
+// ---------------- SCENES ----------------
 function scene1() {
   background("#081010");
   if (cur1X > targetCur1X) cur1X -= curtainSpeed;
@@ -295,8 +295,4 @@ function wordWrap(str,maxWidth){
   }
   lines.push(currentLine);
   return lines.join('\n');
-}
-
-function playSound(){
-  if(sound.paused) sound.play();
 }
