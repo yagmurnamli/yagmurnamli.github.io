@@ -1,77 +1,57 @@
-let sound;
-let video;
+let sound, video, classifier;
 let label = "waiting...";
-let classifier;
-let modelURL = "https://teachablemachine.withgoogle.com/models/ZlwamfTxu/";
+let modelURL = "https://teachablemachine.withgoogle.com/models/ZlwamfTxu/model.json";
 
-// Images
 let img1, img2, img3, img4, cur1, cur2;
-
-// Button
 let button;
 
-// Curtains
 let cur1X, cur2X, targetCur1X, targetCur2X;
 let curtainSpeed = 2;
 let curtainsOpen = false;
 
-// Font
 let customFont;
-
-// Scene & animation
-let typewriterFinished = false;
-let shakeStartTime = 0;
-let shakeDuration = 3000;
-let shakeIntensity = 5;
-let reachSwitched = false;
-let reachStartTime = 0;
-let scene4Displayed = false;
-let scene4Opacity = 0;
-let lookSwitched = false;
-let lookStartTime = 0;
-let scene5Displayed = false;
-let spiralRadius = 0;
-let angleStep = 0.5;
-let imga;
-let scene4TextOpacity = 0;
-let scene5TextOpacity = 0;
-
-// Text / typewriter
-let fullText = "Welcome, foolish mortal. You seek the key, do you? It holds power beyond your comprehension. But do you dare to claim it? I am the guardian, the puppet master. Face me if you dare, but beware, the consequences may be dire.";
 let displayedText = "";
 let charIndex = 0;
 let typingSpeed = 80;
-let typewriterInterval;
+let fullText = "Welcome, foolish mortal. You seek the key, do you? It holds power beyond your comprehension. But do you dare to claim it? I am the guardian, the puppet master. Face me if you dare, but beware, the consequences may be dire.";
+let typewriterFinished = false;
 
-// Breathing
 let breathingOffset = 0;
-let breathingSpeed = 0.05;
+let breathingSpeed = 0.03;
 let breathingAmplitude = 10;
 
-// Title
-let titleOpacity = 255;
-let titleFadeSpeed = 0;
+let shakeStartTime = 0;
+let shakeDuration = 3000;
+let shakeIntensity = 5;
+let reachStartTime = 0;
+let lookStartTime = 0;
+let reachSwitched = false;
+let lookSwitched = false;
 
-// Typewriter delay
-let startTypewriterTimer = 0;
-let typewriterDelay = 1000;
+let scene4Displayed = false;
+let scene4Opacity = 0;
+let scene4TextOpacity = 0;
 
-// Classifier start control
+let scene5Displayed = false;
+let spiralRadius = 0;
+let angleStep = 0.5;
+let scene5TextOpacity = 0;
+
 let classifierStarted = false;
-
-// Auto scene fallback timers
-let fallbackTimer = 0;
-let scene3Started = false;
+let typewriterDelay = 2000; // start typewriter 2 sec after curtain opens
 
 function preload() {
   sound = new Audio('sound/Bunraku puppet theatre.mp3');
-  classifier = ml5.imageClassifier(modelURL + "model.json");
+  classifier = ml5.imageClassifier(modelURL);
+  
   img1 = loadImage("images/puppet1.png");
   img2 = loadImage("images/puppet2.png");
   img3 = loadImage("images/puppet3.png");
   img4 = loadImage("images/puppet4.png");
+  
   cur1 = loadImage("images/curtain1.png");
   cur2 = loadImage("images/curtain2.png");
+  
   customFont = loadFont("font/MaleriTrialSN-Book.otf");
 }
 
@@ -89,8 +69,7 @@ function setup() {
   targetCur1X = cur1X;
   targetCur2X = cur2X;
 
-  // Start button
-  button = createButton("START");
+  button = createButton("start");
   button.size(150, 50);
   button.style("background-color", "#8b242c");
   button.style("color", "#d6d6d6");
@@ -101,217 +80,215 @@ function setup() {
   button.position((width - button.width)/2, height/2);
   button.mousePressed(openCurtains);
 
-  // Pulse animation
-  button.style("animation", "pulse 2s infinite");
-  let pulseAnimation = `@keyframes pulse {0%{transform:scale(1);}50%{transform:scale(1.1);}100%{transform:scale(1);}}`;
+  let pulseAnimation = `@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+    100% { transform: scale(1); }
+  }`;
   let styleSheet = document.createElement("style");
   styleSheet.type = "text/css";
   styleSheet.innerText = pulseAnimation;
   document.head.appendChild(styleSheet);
-}
-
-// Open curtains
-function openCurtains() {
-  if (!curtainsOpen) {
-    targetCur1X = -cur1.width / 2;
-    targetCur2X = width + cur2.width / 2;
-    curtainsOpen = true;
-    button.hide();
-    titleFadeSpeed = 1.9;
-  }
-}
-
-// Typewriter
-function typeWriter() {
-  if (charIndex < fullText.length) {
-    displayedText += fullText.charAt(charIndex);
-    charIndex++;
-  } else {
-    typewriterFinished = true;
-    clearInterval(typewriterInterval);
-    fallbackTimer = millis(); // start fallback timer
-  }
-}
-
-// Classify video
-function classifyVideo() {
-  classifier.classify(video, gotResults);
-}
-
-function gotResults(error, results) {
-  if (error) {
-    console.error(error);
-    return;
-  }
-  if(results && results[0]){
-    label = results[0].label;
-  }
-  classifier.classify(video, gotResults); // sürekli sınıflandır
+  button.style("animation", "pulse 2s infinite");
 }
 
 function draw() {
   background("#081010");
   playSound();
-
+  
   scene1();
 
-  // Perdeler tamamen açıldı mı?
-  if (curtainsOpen && cur1X <= targetCur1X && cur2X >= targetCur2X) {
-    // Typewriter başlat
-    if (startTypewriterTimer === 0) startTypewriterTimer = millis();
-    else if (!typewriterInterval && millis() - startTypewriterTimer >= typewriterDelay) {
+  // start typewriter only after curtain fully opened + delay
+  if(curtainsOpen && cur1X <= targetCur1X && cur2X >= targetCur2X && !classifierStarted){
+    classifierStarted = true;
+    setTimeout(() => {
       typewriterInterval = setInterval(typeWriter, typingSpeed);
-    }
-
-    // Classifier başlat
-    if (!classifierStarted) {
-      classifierStarted = true;
       classifyVideo();
-    }
+    }, typewriterDelay);
   }
 
-  if (titleOpacity <= 0) scene2();
-
-  if (typewriterFinished || scene3Started) {
-    scene3Started = true;
+  if(typewriterFinished){
     scene3();
   }
 
-  // Fallback otomatik sahne geçişi
-  if(scene3Started && millis() - fallbackTimer > 8000 && !scene4Displayed) {
-    scene4Displayed = true;
-  }
-
-  if(label === "reach" && millis() - reachStartTime >= 3000 && !reachSwitched) {
+  // reach label logic
+  if(label === "reach" && !reachSwitched && millis() - reachStartTime >= 3000){
     reachSwitched = true;
     scene4Displayed = true;
-  } else if(label !== "reach") reachStartTime = millis(), reachSwitched=false;
+  } else if(label !== "reach"){
+    reachStartTime = millis();
+    reachSwitched = false;
+  }
 
-  if(scene4Displayed) scene4();
-
-  if(label === "look" && millis() - lookStartTime >= 3000 && !lookSwitched) {
+  // look label logic
+  if(label === "look" && !lookSwitched && millis() - lookStartTime >= 3000){
     lookSwitched = true;
     scene5Displayed = true;
-  } else if(label !== "look") lookStartTime = millis(), lookSwitched=false;
+  } else if(label !== "look"){
+    lookStartTime = millis();
+    lookSwitched = false;
+  }
 
+  if(scene4Displayed) scene4();
   if(scene5Displayed) scene5();
 
-  // Webcam corner
-  image(video, 330, 250);
+  image(video, 500, 100, 160, 120);
 }
 
-// SCENES
-function scene1() {
-  background("#081010");
+// Curtain opening
+function openCurtains(){
+  if(!curtainsOpen){
+    targetCur1X = -cur1.width/2;
+    targetCur2X = width + cur2.width/2;
+    curtainsOpen = true;
+    button.hide();
+  }
+}
+
+// Typewriter
+function typeWriter(){
+  if(charIndex < fullText.length){
+    displayedText += fullText.charAt(charIndex);
+    charIndex++;
+  } else {
+    typewriterFinished = true;
+    clearInterval(typewriterInterval);
+  }
+}
+
+// Scene1: curtain + title
+function scene1(){
   if(cur1X > targetCur1X) cur1X -= curtainSpeed;
   if(cur2X < targetCur2X) cur2X += curtainSpeed;
-  if(titleOpacity>0) titleOpacity-=titleFadeSpeed;
+
+  textSize(100);
+  textAlign(CENTER, CENTER);
+  fill(255);
+  text("BUNRAKU", width/2, height/2 - 80);
 
   image(cur1, cur1X, height/2);
   image(cur2, cur2X, height/2);
-
-  if(!curtainsOpen){
-    textSize(100);
-    textAlign(CENTER, CENTER);
-    fill(255, titleOpacity);
-    text("BUNRAKU", width/2, height/2-80);
-  }
 }
 
-function scene2() {
+// Scene2: typewriter + breathing
+function scene2(){
   background("#081010");
-  let breathingY = height/2 + sin(breathingOffset)*breathingAmplitude;
-  let imgToShow = charIndex % 3 === 0 ? img1 : img2;
-  image(imgToShow, width/2, breathingY);
+  let breathingY = height/2 + sin(breathingOffset) * breathingAmplitude;
   breathingOffset += breathingSpeed;
+  image(img1, width/2, breathingY);
 
-  if(curtainsOpen && typewriterInterval){
-    textSize(24);
-    textAlign(LEFT, TOP);
-    fill(255);
-    let wrappedText = wordWrap(displayedText, width-40);
-    text(wrappedText, 20, height/2 + 150);
-  }
+  textSize(24);
+  textAlign(LEFT, TOP);
+  fill(255);
+  let wrappedText = wordWrap(displayedText, width - 40);
+  text(wrappedText, 20, height/2 + 150);
 }
 
-function scene3() {
+// Scene3: breathing + label movement
+function scene3(){
   background("#081010");
 
-  if(label==="reach") {
-    if(!shakeStartTime) shakeStartTime=millis();
-    imga=img3;
+  // Breathing animation
+  let breathingY = height/2 + sin(breathingOffset) * breathingAmplitude;
+  breathingOffset += breathingSpeed;
+  image(img1, width/2, breathingY);
+
+  // Movement / shake
+  if(label === "reach" || label === "look"){
+    if(shakeStartTime === 0) shakeStartTime = millis();
+    imga = label === "reach" ? img3 : img4;
     shakeImage();
-  } else if(label==="look") {
-    if(!shakeStartTime) shakeStartTime=millis();
-    imga=img4;
-    shakeImage();
-  } else {
-    let breathingY = height/2 + sin(breathingOffset)*breathingAmplitude;
-    image(img1, width/2, breathingY);
-    breathingOffset += breathingSpeed;
   }
 }
 
-function shakeImage() {
-  let elapsed = millis()-shakeStartTime;
+function shakeImage(){
+  let elapsed = millis() - shakeStartTime;
   let offsetX = random(-shakeIntensity, shakeIntensity);
   let offsetY = random(-shakeIntensity, shakeIntensity);
   image(imga, width/2 + offsetX, height/2 + offsetY);
-  if(elapsed>=shakeDuration){
-    shakeStartTime=0;
-    label="scene4";
+
+  if(elapsed >= shakeDuration){
+    shakeStartTime = 0;
   }
 }
 
-function scene4() {
-  scene4Opacity+=1; if(scene4Opacity>255)scene4Opacity=255;
+// Scene4: You Are Free
+function scene4(){
+  scene4Opacity += 1;
+  if(scene4Opacity > 255) scene4Opacity = 255;
   fill(255, scene4Opacity);
-  rect(0,0,width,height);
+  rect(0, 0, width, height);
 
-  scene4TextOpacity+=1; if(scene4TextOpacity>255)scene4TextOpacity=255;
+  scene4TextOpacity += 1;
+  if(scene4TextOpacity > 255) scene4TextOpacity = 255;
   fill(0, scene4TextOpacity);
   textSize(32);
-  textAlign(CENTER,CENTER);
+  textAlign(CENTER, CENTER);
   text("You Are Free...", width/2, height/2);
 }
 
-function scene5() {
+// Scene5: spiral
+function scene5(){
   background("#081010");
-  if(spiralRadius<sqrt(sq(width)+sq(height))) spiralRadius+=5;
+  if(spiralRadius < sqrt(sq(width)+sq(height))) spiralRadius += 5;
   drawSpiral(width/2, height/2, spiralRadius, millis()/1000);
 }
 
-function drawSpiral(cx,cy,maxRadius,startAngle){
-  noFill(); stroke(255); strokeWeight(2);
-  let angle=startAngle;
+function drawSpiral(cx, cy, maxRadius, startAngle){
+  noFill();
+  stroke(255);
+  strokeWeight(2);
+
+  let angle = startAngle;
   beginShape();
-  for(let r=0;r<maxRadius;r++){
-    let x=cx+cos(angle)*r;
-    let y=cy+sin(angle)*r;
-    vertex(x,y);
-    angle+=angleStep;
+  for(let r=0; r<maxRadius; r++){
+    let x = cx + cos(angle)*r;
+    let y = cy + sin(angle)*r;
+    vertex(x, y);
+    angle += angleStep;
   }
   endShape();
 
-  fill(255,0,0,scene5TextOpacity);
+  fill(255, 0, 0, scene5TextOpacity);
   textSize(32);
-  textAlign(CENTER,CENTER);
+  textAlign(CENTER, CENTER);
   text("You Fall Unconscious...", cx, cy);
 }
 
-function wordWrap(str,maxWidth){
-  let words=str.split(' ');
-  let lines=[];
-  let currentLine=words[0];
-  for(let i=1;i<words.length;i++){
-    let word=words[i];
-    if(textWidth(currentLine+' '+word)<maxWidth) currentLine+=' '+word;
-    else{lines.push(currentLine); currentLine=word;}
+// Word wrap
+function wordWrap(str, maxWidth){
+  let words = str.split(' ');
+  let lines = [];
+  let currentLine = words[0];
+
+  for(let i=1; i<words.length; i++){
+    let word = words[i];
+    if(textWidth(currentLine + ' ' + word) < maxWidth){
+      currentLine += ' ' + word;
+    } else {
+      lines.push(currentLine);
+      currentLine = word;
+    }
   }
   lines.push(currentLine);
   return lines.join('\n');
 }
 
+// ml5 classify
+function classifyVideo(){
+  classifier.classify(video, gotResults);
+}
+
+function gotResults(error, results){
+  if(error){ console.error(error); return; }
+  if(results && results[0]){
+    label = results[0].label;
+    console.log(label);
+  }
+  classifier.classify(video, gotResults);
+}
+
+// Play sound
 function playSound(){
   if(sound.paused) sound.play();
 }
