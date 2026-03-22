@@ -66,6 +66,10 @@ let breathingAmplitude = 10;
 let titleOpacity = 255;
 let titleFadeSpeed = 0;
 
+// Typewriter delay
+let startTypewriterTimer = 0;
+let typewriterDelay = 1500; // ms (1.5 saniye)
+
 function preload() {
   sound = new Audio('sound/Bunraku puppet theatre.mp3');
   classifier = ml5.imageClassifier(modelURL + "model.json");
@@ -111,7 +115,6 @@ function setup() {
   styleSheet.innerText = pulseAnimation;
   document.head.appendChild(styleSheet);
 
-  // STEP 2: Start classification
   classifyVideo();
 }
 
@@ -122,9 +125,6 @@ function openCurtains() {
     curtainsOpen = true;
     button.hide();
     titleFadeSpeed = 1.9;
-
-    // Typewriter başlasın
-    typewriterInterval = setInterval(typeWriter, typingSpeed);
   }
 }
 
@@ -156,6 +156,16 @@ function draw() {
   playSound();
 
   scene1();
+
+  // --- PERDELER TAMAMEN AÇILDI MI? ---
+  if (curtainsOpen && cur1X <= targetCur1X && cur2X >= targetCur2X) {
+    if (startTypewriterTimer === 0) {
+      startTypewriterTimer = millis(); // Timer başlat
+    } else if (!typewriterInterval && millis() - startTypewriterTimer >= typewriterDelay) {
+      // 1.5 saniye geçti, typewriter başlasın
+      typewriterInterval = setInterval(typeWriter, typingSpeed);
+    }
+  }
 
   if (titleOpacity <= 0) {
     scene2();
@@ -212,8 +222,7 @@ function scene2() {
   image(imgToShow, width/2, breathingY);
   breathingOffset += breathingSpeed;
 
-  // Altyazı
-  if (curtainsOpen) {
+  if (curtainsOpen && typewriterInterval) {
     textSize(24);
     textAlign(LEFT, TOP);
     fill(255);
