@@ -1,127 +1,129 @@
+// sketch.js
+
 let video;
 let classifier;
-let modelURL = 'https://teachablemachine.withgoogle.com/models/ZlwamfTxu/'; // Teachable Machine model URL
-let flipVideo;
+let modelURL = 'https://teachablemachine.withgoogle.com/models/ZlwamfTxu/'; // Teachable Machine model klasörünüz
 let label = "";
+let confidence = 0;
 
-let curtainsOpen = false;
-let subtitles = ["Welcome to Bunraku.", "Enjoy the show!", "You are free!"];
-let currentSubtitle = 0;
+let curtain = 0; // perde pozisyonu
+let curtainSpeed = 2; 
+let showCurtain = true;
+
+let subtitleIndex = 0;
+let subtitles = ["Welcome to BUNRAKU", "Move your hands to interact!"];
 let subtitleTimer = 0;
-let subtitleDelay = 2000; // ms
+let subtitleDelay = 2000;
 
-let puppetPosY = 300;
-let puppetBreathOffset = 0;
-let startButtonClicked = false;
+let puppetImg; // kukla resmi
+let puppetX, puppetY;
+let puppetPose = "idle";
 
 let startSound;
 
+let gameStarted = false;
+
 function preload() {
-  // Kullanıcı etkileşimi sonrası çalmak için preload'da ses yükleme
+  // Ses dosyası
   startSound = loadSound('start.mp3');
-  classifier = ml5.imageClassifier(modelURL + 'model.json');
+  // Kukla resmi
+  puppetImg = loadImage('puppet.png');
 }
 
 function setup() {
   createCanvas(800, 600);
-
-  // Video
+  
   video = createCapture(VIDEO);
   video.size(320, 240);
   video.hide();
-  flipVideo = ml5.flipImage(video);
 
-  // Start tuşu
-  let startBtn = createButton("Start");
-  startBtn.position(10, 10);
-  startBtn.mousePressed(() => {
-    startButtonClicked = true;
-    if (startSound && !startSound.isPlaying()) startSound.play();
-    openCurtains();
-    classifyVideo(); // ML5 sınıflandırmayı başlat
-  });
+  // Teachable Machine modelini yükle
+  classifier = ml5.imageClassifier(modelURL + 'model.json', video, modelReady);
+
+  puppetX = width / 2;
+  puppetY = height - 200;
+
+  textAlign(CENTER, CENTER);
+  textSize(32);
+}
+
+function modelReady() {
+  console.log("Model loaded!");
+  classifyVideo();
+}
+
+// ML5 sınıflandırma
+function classifyVideo() {
+  classifier.classify(gotResults);
+}
+
+function gotResults(error, results) {
+  if (error) {
+    console.error(error);
+    return;
+  }
+  
+  label = results[0].label;
+  confidence = results[0].confidence;
+
+  // Kukla hareketini değiştir
+  if (label === "MoveLeft") puppetPose = "left";
+  else if (label === "MoveRight") puppetPose = "right";
+  else puppetPose = "idle";
+
+  classifyVideo(); // sürekli sınıflandır
 }
 
 function draw() {
   background(0);
 
-  drawTitle();        // BUNRAKU yazısı
-  drawCurtains();     // perde animasyonu
-  drawPuppet();       // kukla
-  drawSubtitles();    // altyazılar
-}
-
-function drawTitle() {
-  textAlign(CENTER, CENTER);
-  textSize(48);
-  fill(255);
-  text("BUNRAKU", width / 2, height / 2 - 200);
-}
-
-let curtainWidth = 0;
-function drawCurtains() {
-  fill(50);
-  if (!curtainsOpen) {
-    rect(0, 0, width/2 - curtainWidth, height);
-    rect(width/2 + curtainWidth, 0, width/2 - curtainWidth, height);
-  } else {
-    // perde açılıyor animasyonlu
-    if(curtainWidth < width/2) curtainWidth += 10;
-    rect(0, 0, width/2 - curtainWidth, height);
-    rect(width/2 + curtainWidth, 0, width/2 - curtainWidth, height);
+  // BUNRAKU yazısı
+  if (!gameStarted) {
+    fill(255);
+    text("BUNRAKU", width/2, height/2);
   }
+
+  // Perde açılıyor
+  if (showCurtain) {
+    fill(100);
+    rect(0, 0, width, curtain);
+    rect(0, height - curtain, width, curtain);
+    
+    curtain += curtainSpeed;
+    if (curtain > height/2) {
+      showCurtain = false;
+      gameStarted = true;
+      subtitleTimer = millis(); // altyazıyı başlat
+    }
+  }
+
+  // Altyazılar perdeden sonra
+  if (gameStarted && subtitleIndex < subtitles.length) {
+    fill(255);
+    text(subtitles[subtitleIndex], width/2, 50);
+    if (millis() - subtitleTimer > subtitleDelay) {
+      subtitleIndex++;
+      subtitleTimer = millis();
+    }
+  }
+
+  // Kukla çizimi
+  drawPuppet();
 }
 
-function openCurtains() {
-  curtainsOpen = true;
-}
-
-// Kukla çizimi
 function drawPuppet() {
-  push();
-  translate(width/2, puppetPosY + puppetBreathOffset);
-  
-  // nefes alma animasyonu
-  if (frameCount % 60 < 30) puppetBreathOffset = -5;
-  else puppetBreathOffset = 0;
+  if (!puppetImg) return;
 
-  fill(200, 100, 100);
-  ellipse(0, 0, 100, 150); // gövde
-  fill(255, 200, 200);
-  ellipse(0, -100, 50, 50); // kafa
-  pop();
+  let offset = 0;
+  if (puppetPose === "left") offset = -20;
+  else if (puppetPose === "right") offset = 20;
+
+  image(puppetImg, puppetX + offset - puppetImg.width/2, puppetY - puppetImg.height/2);
 }
 
-// Altyazı çizimi
-function drawSubtitles() {
-  if (!startButtonClicked || !curtainsOpen) return;
-
-  fill(255);
-  textSize(24);
-  textAlign(CENTER, BOTTOM);
-  if (millis() - subtitleTimer > subtitleDelay) {
-    subtitleTimer = millis();
-    currentSubtitle++;
-    if(currentSubtitle >= subtitles.length) currentSubtitle = subtitles.length - 1;
+// Kullanıcı etkileşimi ile sesi başlat
+function mousePressed() {
+  if (!startSound.isPlaying()) {
+    startSound.play();
   }
-  text(subtitles[currentSubtitle], width/2, height - 50);
-}
-
-// ML5 hareket algılama
-function classifyVideo() {
-  flipVideo = ml5.flipImage(video);
-  classifier.classify(flipVideo, gotResults);
-}
-
-function gotResults(error, results) {
-  if(error){
-    console.error(error);
-    return;
-  }
-  label = results[0].label;
-  // Burada kukla pozunu veya aksiyonu değiştir
-  // Örn: label === "Jump" -> kukla yukarı zıplasın
-  console.log(label);
-
-  classifyVideo(); // sürekli sınıflandırma
 }
