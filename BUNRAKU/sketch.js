@@ -20,10 +20,8 @@ let curtainsOpen = false;
 let customFont;
 
 // Scene control
-let scene2StartTime;
 let typewriterFinished = false;
-let switchTime;
-let shakeStartTime = null;
+let shakeStartTime;
 let shakeDuration = 3000;
 let shakeIntensity = 5;
 let reachSwitched = false;
@@ -34,7 +32,6 @@ let lookSwitched = false;
 let lookStartTime;
 let scene5Displayed = false;
 let spiralRadius = 0;
-let spiralAngle = 0;
 let angleStep = 0.5;
 let imga;
 let scene4TextOpacity = 0;
@@ -55,9 +52,9 @@ let displayedText = "";
 let charIndex = 0;
 let typingSpeed = 80;
 
-// -------------------- PRELOAD --------------------
+// ------------------ PRELOAD ------------------
 function preload() {
-  sound = new Audio('sound/Bunraku puppet theatre.mp3');
+  sound = new Audio('sound/Bunraku puppet theatre.mp3'); // Ses sadece kullanıcı ile çalacak
   classifier = ml5.imageClassifier(modelURL + "model.json");
   img1 = loadImage("images/puppet1.png");
   img2 = loadImage("images/puppet2.png");
@@ -68,28 +65,24 @@ function preload() {
   customFont = loadFont("font/MaleriTrialSN-Book.otf");
 }
 
-// -------------------- SETUP --------------------
+// ------------------ SETUP ------------------
 function setup() {
   createCanvas(700, 700);
   textFont(customFont);
   imageMode(CENTER);
 
-  // Video setup
+  // Video capture
   video = createCapture(VIDEO);
   video.size(160, 120);
   video.hide();
 
-  video.elt.onloadeddata = () => {
-    classifyVideo();
-  };
-
-  // Curtain positions
+  // Curtain initial positions
   cur1X = width / 2;
   cur2X = width / 2;
   targetCur1X = cur1X;
   targetCur2X = cur2X;
 
-  // Button setup
+  // Button
   button = createButton("start");
   button.size(150, 50);
   button.style("background-color", "#8b242c");
@@ -100,9 +93,8 @@ function setup() {
   button.style("font-family", customFont);
   button.position((width - button.width) / 2, height / 2);
   button.mousePressed(openCurtains);
-  button.style("animation", "pulse 2s infinite");
 
-  // Button pulse animation
+  // Button pulsing animation
   let pulseAnimation = `
     @keyframes pulse {
       0% { transform: scale(1); }
@@ -114,28 +106,32 @@ function setup() {
   styleSheet.type = "text/css";
   styleSheet.innerText = pulseAnimation;
   document.head.appendChild(styleSheet);
+  button.style("animation", "pulse 2s infinite");
 
-  // Typewriter effect
+  // Start typewriter
   setInterval(typeWriter, typingSpeed);
 
-  // Initialize timers
-  reachStartTime = millis();
-  lookStartTime = millis();
+  // Start classifying video
+  classifyVideo();
 }
 
-// -------------------- CURTAIN OPEN --------------------
+// ------------------ OPEN CURTAINS ------------------
 function openCurtains() {
   if (!curtainsOpen) {
     targetCur1X = -cur1.width / 2;
     targetCur2X = width + cur2.width / 2;
     curtainsOpen = true;
     button.hide();
-    clear();
     titleFadeSpeed = 1.9;
+
+    // Play sound once when user starts
+    if (sound.paused) {
+      sound.play().catch((err) => console.log("Audio blocked:", err));
+    }
   }
 }
 
-// -------------------- VIDEO CLASSIFY --------------------
+// ------------------ VIDEO CLASSIFICATION ------------------
 function classifyVideo() {
   classifier.classify(video, gotResults);
 }
@@ -150,62 +146,45 @@ function gotResults(error, results) {
   print(results);
 }
 
-// -------------------- TYPEWRITER --------------------
-function typeWriter() {
-  if (charIndex < fullText.length) {
-    displayedText += fullText.charAt(charIndex);
-    charIndex++;
-  } else {
-    typewriterFinished = true;
-  }
-}
-
-// -------------------- DRAW --------------------
+// ------------------ DRAW ------------------
 function draw() {
   background("#081010");
-  playSound();
 
   scene1();
-
   if (titleOpacity <= 0) scene2();
   if (typewriterFinished) scene3();
 
-  // Reach logic (scene4)
-  if (label === "reach") {
-    if (!reachStartTime) reachStartTime = millis();
-    if (millis() - reachStartTime >= 3000 && !reachSwitched) {
-      reachSwitched = true;
-      scene4Displayed = true;
-    }
-  } else {
+  // reach label logic
+  if (label === "reach" && millis() - reachStartTime >= 3000 && !reachSwitched) {
+    reachSwitched = true;
+    scene4Displayed = true;
+  } else if (label !== "reach") {
     reachStartTime = millis();
     reachSwitched = false;
   }
 
   if (scene4Displayed) scene4();
 
-  // Look logic (scene5)
-  if (label === "look") {
-    if (!lookStartTime) lookStartTime = millis();
-    if (millis() - lookStartTime >= 3000 && !lookSwitched) {
-      lookSwitched = true;
-      scene5Displayed = true;
-    }
-  } else {
+  // look label logic
+  if (label === "look" && millis() - lookStartTime >= 3000 && !lookSwitched) {
+    lookSwitched = true;
+    scene5Displayed = true;
+  } else if (label !== "look") {
     lookStartTime = millis();
     lookSwitched = false;
   }
 
   if (scene5Displayed) scene5();
 
-  // Draw video feed in corner
+  // Video preview
   image(video, 330, 250);
 }
 
-// -------------------- SCENES --------------------
+// ------------------ SCENES ------------------
 function scene1() {
   if (cur1X > targetCur1X) cur1X -= curtainSpeed;
   if (cur2X < targetCur2X) cur2X += curtainSpeed;
+
   if (titleOpacity > 0) titleOpacity -= titleFadeSpeed;
 
   image(cur1, cur1X, height / 2);
@@ -227,7 +206,35 @@ function scene2() {
   textSize(24);
   textAlign(LEFT, TOP);
   fill(255);
-  text(wordWrap(displayedText, width - 40), 20, height / 2 + 150);
+  let wrappedText = wordWrap(displayedText, width - 40);
+  text(wrappedText, 20, height / 2 + 150);
+}
+
+function typeWriter() {
+  if (charIndex < fullText.length) {
+    displayedText += fullText.charAt(charIndex);
+    charIndex++;
+  } else {
+    typewriterFinished = true;
+  }
+}
+
+function wordWrap(str, maxWidth) {
+  let words = str.split(' ');
+  let lines = [];
+  let currentLine = words[0];
+
+  for (let i = 1; i < words.length; i++) {
+    let word = words[i];
+    if (textWidth(currentLine + ' ' + word) < maxWidth) {
+      currentLine += ' ' + word;
+    } else {
+      lines.push(currentLine);
+      currentLine = word;
+    }
+  }
+  lines.push(currentLine);
+  return lines.join('\n');
 }
 
 function scene3() {
@@ -236,12 +243,12 @@ function scene3() {
     if (!shakeStartTime) shakeStartTime = millis();
     imga = img3;
     shakeImage();
+  } else if (label === "still") {
+    image(img1, width / 2, height / 2);
   } else if (label === "look") {
     if (!shakeStartTime) shakeStartTime = millis();
     imga = img4;
     shakeImage();
-  } else {
-    image(img1, width / 2, height / 2);
   }
 }
 
@@ -252,17 +259,17 @@ function shakeImage() {
   image(imga, width / 2 + offsetX, height / 2 + offsetY);
 
   if (elapsedTime >= shakeDuration) {
-    shakeStartTime = null;
+    shakeStartTime = 0;
     label = "scene4";
   }
 }
 
 function scene4() {
-  scene4Opacity = min(scene4Opacity + 5, 255);
+  scene4Opacity = min(scene4Opacity + 1, 255);
   fill(255, scene4Opacity);
   rect(0, 0, width, height);
 
-  scene4TextOpacity = min(scene4TextOpacity + 5, 255);
+  scene4TextOpacity = min(scene4TextOpacity + 1, 255);
   fill(0, scene4TextOpacity);
   textSize(32);
   textAlign(CENTER, CENTER);
@@ -293,27 +300,4 @@ function drawSpiral(cx, cy, maxRadius, startAngle) {
   textSize(32);
   textAlign(CENTER, CENTER);
   text("You Fall Unconscious...", width / 2, height / 2);
-}
-
-// -------------------- HELPERS --------------------
-function wordWrap(str, maxWidth) {
-  let words = str.split(' ');
-  let lines = [];
-  let currentLine = words[0];
-  for (let i = 1; i < words.length; i++) {
-    let word = words[i];
-    if (textWidth(currentLine + ' ' + word) < maxWidth) {
-      currentLine += ' ' + word;
-    } else {
-      lines.push(currentLine);
-      currentLine = word;
-    }
-  }
-  lines.push(currentLine);
-  return lines.join('\n');
-}
-
-// -------------------- SOUND --------------------
-function playSound() {
-  if (sound.paused) sound.play();
 }
