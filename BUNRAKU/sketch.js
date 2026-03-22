@@ -151,13 +151,10 @@ function draw() {
   if (curtainsOpen && cur1X <= targetCur1X && cur2X >= targetCur2X) {
     if (startTypewriterTimer === 0) {
       startTypewriterTimer = millis(); // Timer başlat
-    } else if (!typewriterInterval && millis() - startTypewriterTimer >= typewriterDelay) {
-      // 2 saniye geçti, typewriter başlasın
-      typewriterInterval = setInterval(typeWriter, typingSpeed);
     }
   }
 
-  if (!curtainsOpen) {
+  if (curtainsOpen) {
     scene2();
   }
 
@@ -185,7 +182,7 @@ function draw() {
 
   if (scene5Displayed) scene5();
 
-  image(video, 100, 100);
+  image(video, 300, 300);
 }
 
 function scene1() {
