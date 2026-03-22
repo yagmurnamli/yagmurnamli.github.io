@@ -69,7 +69,8 @@ function preload() {
 }
 
 function setup() {
-  createCanvas(700, 700);
+  let canvas = createCanvas(700, 700);
+  canvas.parent("canvas-container");
   textFont(customFont);
   imageMode(CENTER);
 
