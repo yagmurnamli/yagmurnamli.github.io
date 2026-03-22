@@ -90,7 +90,7 @@ function setup() {
   button.style("border", "none");
   button.style("cursor", "pointer");
   button.style("font-family", customFont);
-  button.position((width - button.width)/2, height/2);
+  button.position(width/2, height/2);
   button.mousePressed(openCurtains);
 
   // Pulse animation
@@ -147,7 +147,7 @@ function draw() {
 
   scene1();
 
-  if (curtainsOpen) {
+  if (curtainsOpen = true) {
     scene2();
   }
 
