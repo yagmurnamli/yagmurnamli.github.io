@@ -46,6 +46,8 @@ let displayedText = "";
 let charIndex = 0;
 let typingSpeed = 80;
 let typewriterInterval;
+let startTypewriterTimer = 0;
+let typewriterDelay = 1500;
 
 // Breathing
 let breathingOffset = 0;
@@ -83,6 +85,7 @@ function setup() {
   targetCur1X = cur1X;
   targetCur2X = cur2X;
 
+  // START butonunu canvas ortasına
   button = createButton("START");
   button.size(150, 50);
   button.style("background-color", "#8b242c");
@@ -92,7 +95,7 @@ function setup() {
   button.style("cursor", "pointer");
   button.style("font-family", customFont);
   button.parent("canvas-container");
-  button.position(0, 0);
+  button.position((width - button.width) / 2, (height - button.height) / 2);
   button.mousePressed(openCurtains);
 
   // Pulse animation
@@ -115,8 +118,7 @@ function openCurtains() {
     button.hide();
     titleFadeSpeed = 1.9;
 
-    // Typewriter başlasın
-    typewriterInterval = setInterval(typeWriter, typingSpeed);
+    startTypewriterTimer = millis(); // typewriter için timer
   }
 }
 
@@ -149,13 +151,15 @@ function draw() {
 
   scene1();
 
-  if (curtainsOpen) {
+  // Perde açıldıktan sonra scene2 başlasın
+  if (curtainsOpen && cur1X <= targetCur1X && cur2X >= targetCur2X) {
+    if (!typewriterInterval && millis() - startTypewriterTimer >= typewriterDelay) {
+      typewriterInterval = setInterval(typeWriter, typingSpeed);
+    }
     scene2();
   }
 
-  if (typewriterFinished) {
-    scene3();
-  }
+  if (typewriterFinished) scene3();
 
   if (label === "reach" && millis() - reachStartTime >= 3000 && !reachSwitched) {
     reachSwitched = true;
@@ -177,7 +181,7 @@ function draw() {
 
   if (scene5Displayed) scene5();
 
-  image(video, 330, 250);
+  image(video, width/2, height/2 - 50);
 }
 
 function scene1() {
@@ -205,13 +209,11 @@ function scene2() {
   breathingOffset += breathingSpeed;
 
   // Altyazı
-  if (curtainsOpen) {
-    textSize(24);
-    textAlign(LEFT, TOP);
-    fill(255);
-    let wrappedText = wordWrap(displayedText, width-40);
-    text(wrappedText, 20, height/2 + 150);
-  }
+  textSize(24);
+  textAlign(LEFT, TOP);
+  fill(255);
+  let wrappedText = wordWrap(displayedText, width-40);
+  text(wrappedText, 20, height/2 + 150);
 }
 
 function scene3() {
