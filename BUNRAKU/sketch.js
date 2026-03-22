@@ -1,19 +1,3 @@
-/* @yagmurnamli
-   last update: March 22 2026
-   Project Name: "BUNRAKU"
-   Explanation: A Japanese puppet, Bunraku, is holding a key, can you take it or not? An interactive experience based on Teachable Machine and player gestures.
-. Inspiration: 
-- https://www.youtube.com/watch?v=kwcillcWOg0&t=6s&ab_channel=TheCodingTrain
-- https://editor.p5js.org/codingtrain/sketches/PoZXqbu4v
-. when encountered with the puppet, try reaching for the camera, or come closer to it.
-. media: https://www.youtube.com/watch?v=0hoK3RFvxwM&ab_channel=%E6%96%87%E5%8C%96%E5%BA%81bunkachannel
-. #todo: 
-- make the scene transitions smoother
-- use more sound effects, distort the music
-- add more options for the gesture interactions
-- add more text for the story
-*/
-
 let sound;
 let video;
 let label = "waiting...";
@@ -70,10 +54,14 @@ let titleFadeSpeed = 0;
 
 // Typewriter delay
 let startTypewriterTimer = 0;
-let typewriterDelay = 1500; // ms (1.5 saniye)
+let typewriterDelay = 1000;
 
-// Classifier start kontrol
+// Classifier start control
 let classifierStarted = false;
+
+// Auto scene fallback timers
+let fallbackTimer = 0;
+let scene3Started = false;
 
 function preload() {
   sound = new Audio('sound/Bunraku puppet theatre.mp3');
@@ -141,6 +129,7 @@ function typeWriter() {
   } else {
     typewriterFinished = true;
     clearInterval(typewriterInterval);
+    fallbackTimer = millis(); // start fallback timer
   }
 }
 
@@ -154,7 +143,9 @@ function gotResults(error, results) {
     console.error(error);
     return;
   }
-  label = results[0].label;
+  if(results && results[0]){
+    label = results[0].label;
+  }
   classifier.classify(video, gotResults); // sürekli sınıflandır
 }
 
@@ -166,11 +157,9 @@ function draw() {
 
   // Perdeler tamamen açıldı mı?
   if (curtainsOpen && cur1X <= targetCur1X && cur2X >= targetCur2X) {
-
     // Typewriter başlat
-    if (startTypewriterTimer === 0) {
-      startTypewriterTimer = millis();
-    } else if (!typewriterInterval && millis() - startTypewriterTimer >= typewriterDelay) {
+    if (startTypewriterTimer === 0) startTypewriterTimer = millis();
+    else if (!typewriterInterval && millis() - startTypewriterTimer >= typewriterDelay) {
       typewriterInterval = setInterval(typeWriter, typingSpeed);
     }
 
@@ -181,63 +170,62 @@ function draw() {
     }
   }
 
-  if (titleOpacity <= 0) {
-    scene2();
-  }
+  if (titleOpacity <= 0) scene2();
 
-  if (typewriterFinished) {
+  if (typewriterFinished || scene3Started) {
+    scene3Started = true;
     scene3();
   }
 
-  if (label === "reach" && millis() - reachStartTime >= 3000 && !reachSwitched) {
+  // Fallback otomatik sahne geçişi
+  if(scene3Started && millis() - fallbackTimer > 8000 && !scene4Displayed) {
+    scene4Displayed = true;
+  }
+
+  if(label === "reach" && millis() - reachStartTime >= 3000 && !reachSwitched) {
     reachSwitched = true;
     scene4Displayed = true;
-  } else if (label !== "reach") {
-    reachStartTime = millis();
-    reachSwitched = false;
-  }
+  } else if(label !== "reach") reachStartTime = millis(), reachSwitched=false;
 
-  if (scene4Displayed) scene4();
+  if(scene4Displayed) scene4();
 
-  if (label === "look" && millis() - lookStartTime >= 3000 && !lookSwitched) {
+  if(label === "look" && millis() - lookStartTime >= 3000 && !lookSwitched) {
     lookSwitched = true;
     scene5Displayed = true;
-  } else if (label !== "look") {
-    lookStartTime = millis();
-    lookSwitched = false;
-  }
+  } else if(label !== "look") lookStartTime = millis(), lookSwitched=false;
 
-  if (scene5Displayed) scene5();
+  if(scene5Displayed) scene5();
 
+  // Webcam corner
   image(video, 330, 250);
 }
 
 // SCENES
 function scene1() {
   background("#081010");
-  if (cur1X > targetCur1X) cur1X -= curtainSpeed;
-  if (cur2X < targetCur2X) cur2X += curtainSpeed;
-  if (titleOpacity > 0) titleOpacity -= titleFadeSpeed;
+  if(cur1X > targetCur1X) cur1X -= curtainSpeed;
+  if(cur2X < targetCur2X) cur2X += curtainSpeed;
+  if(titleOpacity>0) titleOpacity-=titleFadeSpeed;
 
   image(cur1, cur1X, height/2);
   image(cur2, cur2X, height/2);
 
-  if (!curtainsOpen) {
+  if(!curtainsOpen){
     textSize(100);
     textAlign(CENTER, CENTER);
     fill(255, titleOpacity);
-    text("BUNRAKU", width/2, height/2 - 80);
+    text("BUNRAKU", width/2, height/2-80);
   }
 }
 
 function scene2() {
   background("#081010");
-  let breathingY = height/2 + sin(breathingOffset) * breathingAmplitude;
+  let breathingY = height/2 + sin(breathingOffset)*breathingAmplitude;
   let imgToShow = charIndex % 3 === 0 ? img1 : img2;
   image(imgToShow, width/2, breathingY);
   breathingOffset += breathingSpeed;
 
-  if (curtainsOpen && typewriterInterval) {
+  if(curtainsOpen && typewriterInterval){
     textSize(24);
     textAlign(LEFT, TOP);
     fill(255);
@@ -248,37 +236,40 @@ function scene2() {
 
 function scene3() {
   background("#081010");
-  if (label === "reach") {
-    if (!shakeStartTime) shakeStartTime = millis();
-    imga = img3;
+
+  if(label==="reach") {
+    if(!shakeStartTime) shakeStartTime=millis();
+    imga=img3;
     shakeImage();
-  } else if (label === "look") {
-    if (!shakeStartTime) shakeStartTime = millis();
-    imga = img4;
+  } else if(label==="look") {
+    if(!shakeStartTime) shakeStartTime=millis();
+    imga=img4;
     shakeImage();
   } else {
-    image(img1, width/2, height/2);
+    let breathingY = height/2 + sin(breathingOffset)*breathingAmplitude;
+    image(img1, width/2, breathingY);
+    breathingOffset += breathingSpeed;
   }
 }
 
 function shakeImage() {
-  let elapsed = millis() - shakeStartTime;
+  let elapsed = millis()-shakeStartTime;
   let offsetX = random(-shakeIntensity, shakeIntensity);
   let offsetY = random(-shakeIntensity, shakeIntensity);
   image(imga, width/2 + offsetX, height/2 + offsetY);
-  if (elapsed >= shakeDuration) {
-    shakeStartTime = 0;
-    label = "scene4";
+  if(elapsed>=shakeDuration){
+    shakeStartTime=0;
+    label="scene4";
   }
 }
 
 function scene4() {
-  scene4Opacity += 1; if(scene4Opacity>255)scene4Opacity=255;
+  scene4Opacity+=1; if(scene4Opacity>255)scene4Opacity=255;
   fill(255, scene4Opacity);
   rect(0,0,width,height);
 
-  scene4TextOpacity += 1; if(scene4TextOpacity>255)scene4TextOpacity=255;
-  fill(0,scene4TextOpacity);
+  scene4TextOpacity+=1; if(scene4TextOpacity>255)scene4TextOpacity=255;
+  fill(0, scene4TextOpacity);
   textSize(32);
   textAlign(CENTER,CENTER);
   text("You Are Free...", width/2, height/2);
@@ -286,19 +277,19 @@ function scene4() {
 
 function scene5() {
   background("#081010");
-  if (spiralRadius < sqrt(sq(width)+sq(height))) spiralRadius+=5;
+  if(spiralRadius<sqrt(sq(width)+sq(height))) spiralRadius+=5;
   drawSpiral(width/2, height/2, spiralRadius, millis()/1000);
 }
 
 function drawSpiral(cx,cy,maxRadius,startAngle){
   noFill(); stroke(255); strokeWeight(2);
-  let angle = startAngle;
+  let angle=startAngle;
   beginShape();
   for(let r=0;r<maxRadius;r++){
-    let x = cx + cos(angle)*r;
-    let y = cy + sin(angle)*r;
+    let x=cx+cos(angle)*r;
+    let y=cy+sin(angle)*r;
     vertex(x,y);
-    angle += angleStep;
+    angle+=angleStep;
   }
   endShape();
 
@@ -309,11 +300,11 @@ function drawSpiral(cx,cy,maxRadius,startAngle){
 }
 
 function wordWrap(str,maxWidth){
-  let words = str.split(' ');
-  let lines = [];
-  let currentLine = words[0];
+  let words=str.split(' ');
+  let lines=[];
+  let currentLine=words[0];
   for(let i=1;i<words.length;i++){
-    let word = words[i];
+    let word=words[i];
     if(textWidth(currentLine+' '+word)<maxWidth) currentLine+=' '+word;
     else{lines.push(currentLine); currentLine=word;}
   }
