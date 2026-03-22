@@ -1,5 +1,6 @@
-/* @yagmurnamli
-   last update: March 22 2026
+/* vcd436s24 - Project (4/4): Submission
+  @yagmurnamli
+   Last update: June 05
    Project Name: "BUNRAKU"
    Explanation: A Japanese puppet, Bunraku, is holding a key. Can you take it or not? An interactive experience based on Teachable Machine and player gestures.
 */
@@ -40,11 +41,11 @@ let imga;
 let scene4TextOpacity = 0;
 let scene5TextOpacity = 0;
 
-// Text / typewriter
+// Text/typewriter
 let fullText = "Welcome, foolish mortal. You seek the key, do you? It holds power beyond your comprehension. But do you dare to claim it? I am the guardian, the puppet master. Face me if you dare, but beware, the consequences may be dire.";
 let displayedText = "";
 let charIndex = 0;
-let typingSpeed = 85;
+let typingSpeed = 80;
 let typewriterInterval;
 
 // Breathing
@@ -54,14 +55,10 @@ let breathingAmplitude = 10;
 
 // Title
 let titleOpacity = 255;
-let titleFadeSpeed = 1;
-
-// Typewriter delay
-let startTypewriterTimer = 0;
-let typewriterDelay = 2000; // ms (2 saniye)
+let titleFadeSpeed = 0;
 
 function preload() {
-  sound = new Audio('sound/start.mp3');
+  sound = new Audio('start.mp3');
   classifier = ml5.imageClassifier(modelURL + "model.json");
   img1 = loadImage("images/puppet1.png");
   img2 = loadImage("images/puppet2.png");
@@ -105,6 +102,7 @@ function setup() {
   styleSheet.innerText = pulseAnimation;
   document.head.appendChild(styleSheet);
 
+  // STEP 2: Start classification
   classifyVideo();
 }
 
@@ -115,6 +113,9 @@ function openCurtains() {
     curtainsOpen = true;
     button.hide();
     titleFadeSpeed = 1.9;
+
+    // Typewriter başlasın
+    typewriterInterval = setInterval(typeWriter, typingSpeed);
   }
 }
 
@@ -147,14 +148,7 @@ function draw() {
 
   scene1();
 
-  // --- PERDELER TAMAMEN AÇILDI MI? ---
-  if (curtainsOpen && cur1X <= targetCur1X && cur2X >= targetCur2X) {
-    if (startTypewriterTimer === 0) {
-      startTypewriterTimer = millis(); // Timer başlat
-    }
-  }
-
-  if (curtainsOpen) {
+  if (titleOpacity <= 0) {
     scene2();
   }
 
@@ -182,7 +176,7 @@ function draw() {
 
   if (scene5Displayed) scene5();
 
-  image(video, -300, -300);
+  image(video, 330, 250);
 }
 
 function scene1() {
@@ -209,7 +203,8 @@ function scene2() {
   image(imgToShow, width/2, breathingY);
   breathingOffset += breathingSpeed;
 
-  if (curtainsOpen && typewriterInterval) {
+  // Altyazı
+  if (curtainsOpen) {
     textSize(24);
     textAlign(LEFT, TOP);
     fill(255);
