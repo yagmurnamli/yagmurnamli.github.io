@@ -1,6 +1,6 @@
 let video;
 let classifier;
-let modelURL = 'MODEL_URL_HERE/'; // Teachable Machine model URL
+let modelURL = 'https://teachablemachine.withgoogle.com/models/ZlwamfTxu/'; // Teachable Machine model URL
 let flipVideo;
 let label = "";
 
