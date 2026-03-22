@@ -144,7 +144,7 @@ function openCurtains() {
     curtainsOpen = true;
     button.hide();
     clear();
-    titleFadeSpeed = 1.5;
+    titleFadeSpeed = 1.2;
   }
 }
 
