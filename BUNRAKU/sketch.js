@@ -15,9 +15,9 @@ let subtitles = ["Welcome to BUNRAKU", "Move your hands to interact!"];
 let subtitleTimer = 0;
 let subtitleDelay = 2000;
 
-let puppetImg; // kukla resmi
+let puppetImgs = []; // 4 pozu tutacak dizi
 let puppetX, puppetY;
-let puppetPose = "idle";
+let puppetPose = 0; // 0,1,2,3 -> pozu belirler
 
 let startSound;
 
@@ -26,8 +26,12 @@ let gameStarted = false;
 function preload() {
   // Ses dosyası
   startSound = loadSound('start.mp3');
-  // Kukla resmi
-  puppetImg = loadImage('puppet.png');
+
+  // Kukla pozları
+  puppetImgs[0] = loadImage('puppet1.png');
+  puppetImgs[1] = loadImage('puppet2.png');
+  puppetImgs[2] = loadImage('puppet3.png');
+  puppetImgs[3] = loadImage('puppet4.png');
 }
 
 function setup() {
@@ -66,10 +70,11 @@ function gotResults(error, results) {
   label = results[0].label;
   confidence = results[0].confidence;
 
-  // Kukla hareketini değiştir
-  if (label === "MoveLeft") puppetPose = "left";
-  else if (label === "MoveRight") puppetPose = "right";
-  else puppetPose = "idle";
+  // Kukla hareketlerini pozlara eşle
+  if (label === "MoveLeft") puppetPose = 1;
+  else if (label === "MoveRight") puppetPose = 2;
+  else if (label === "Jump") puppetPose = 3;
+  else puppetPose = 0; // idle
 
   classifyVideo(); // sürekli sınıflandır
 }
@@ -112,13 +117,9 @@ function draw() {
 }
 
 function drawPuppet() {
-  if (!puppetImg) return;
+  if (!puppetImgs[puppetPose]) return;
 
-  let offset = 0;
-  if (puppetPose === "left") offset = -20;
-  else if (puppetPose === "right") offset = 20;
-
-  image(puppetImg, puppetX + offset - puppetImg.width/2, puppetY - puppetImg.height/2);
+  image(puppetImgs[puppetPose], puppetX - puppetImgs[puppetPose].width/2, puppetY - puppetImgs[puppetPose].height/2);
 }
 
 // Kullanıcı etkileşimi ile sesi başlat
