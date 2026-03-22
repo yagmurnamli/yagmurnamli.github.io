@@ -157,7 +157,7 @@ function draw() {
     }
   }
 
-  if (titleOpacity <= 0) {
+  if (!curtainsOpen) {
     scene2();
   }
 
@@ -185,7 +185,7 @@ function draw() {
 
   if (scene5Displayed) scene5();
 
-  image(video, 20, 20);
+  image(video, 100, 100);
 }
 
 function scene1() {
