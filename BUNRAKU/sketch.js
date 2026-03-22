@@ -23,13 +23,13 @@ let subtitleTimer = 0;
 let showSubtitle = false;
 
 function preload() {
-  // Kukla pozlarını yükle
+  // Kukla pozlarını yükle (images klasöründen)
   for (let i = 1; i <= 4; i++) {
-    puppetImgs.push(loadImage(`puppet${i}.png`));
+    puppetImgs.push(loadImage(`images/puppet${i}.png`));
   }
 
-  // Ses (eski Audio() kullanımı)
-  startSound = new Audio('start.mp3');
+  // Ses (sound klasöründen)
+  startSound = new Audio('sound/start.mp3');
 }
 
 function setup() {
@@ -87,7 +87,6 @@ function draw() {
     fill(255);
     text("BUNRAKU", width / 2, height / 2);
   } else if (scene === "curtain") {
-    // Perdeyi basit siyah ekran ile simüle ediyoruz
     fill(0);
     rect(0, 0, width, height);
 
@@ -96,9 +95,9 @@ function draw() {
       showSubtitle = true;
       fill(255);
       text(subtitles[subtitleIndex], width / 2, height - 100);
-      if (millis() - subtitleTimer > 3000) { // 3 saniye her altyazı
+      if (millis() - subtitleTimer > 3000) {
         subtitleIndex++;
-        subtitleTimer = millis() + 500; // 0.5 saniye ara
+        subtitleTimer = millis() + 500;
       }
     }
 
@@ -108,18 +107,17 @@ function draw() {
       puppetTimer = millis();
     }
   } else if (scene === "puppet") {
-    // Kukla animasyonu (nefes alma)
-    if (millis() - puppetTimer > 500) { // her 0.5 saniye poz değiş
+    // Kukla animasyonu
+    if (millis() - puppetTimer > 500) {
       currentPuppet = (currentPuppet + 1) % puppetImgs.length;
       puppetTimer = millis();
     }
     image(puppetImgs[currentPuppet], width / 2 - 100, height / 2 - 200, 200, 400);
 
     // ML hareketleri algılaması
-    if (label === "Move" || label === "Jump") { // modeline göre label
+    if (label === "Move" || label === "Jump") {
       fill(0, 255, 0);
       text("You did a move! Scene progresses...", width / 2, height - 50);
-      // Buraya oyun mantığı eklenebilir
     }
   }
 
