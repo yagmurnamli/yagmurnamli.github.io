@@ -144,7 +144,7 @@ function openCurtains() {
     curtainsOpen = true;
     button.hide();
     clear();
-    titleFadeSpeed = 1.9;
+    titleFadeSpeed = 1.5;
   }
 }
 
@@ -180,7 +180,7 @@ function draw() {
 
   scene1();
 
-  if (curtainsOpen) {
+  if (titleOpacity <= 0) {
     scene2();
   }
 
