@@ -4,12 +4,67 @@
     <meta charset="utf-8">
     <title>My Game</title>
     <div style="display:flex; justify-content:center; align-items:center; height:100vh;">
-  <iframe 
-    src="https://editor.p5js.org/yagmur2003namli/full/BAFGxmM2o"
-    width="800" 
-    height="600"
-    style="border:none;">
-  </iframe>
+  <!DOCTYPE html>
+
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>My Interactive Game</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <style>
+    body {
+      margin: 0;
+      background: black;
+      color: white;
+      font-family: Arial, sans-serif;
+      overflow: hidden;
+    }
+
+    .container {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+
+    iframe {
+      border: none;
+    }
+
+    h1 {
+      margin-bottom: 10px;
+      font-weight: normal;
+    }
+
+    p {
+      margin-top: 0;
+      opacity: 0.7;
+      font-size: 14px;
+    }
+  </style>
+
+</head>
+
+<body>
+  <div class="container">
+    <h1>Interactive Webcam Piece</h1>
+    <p>Allow camera access for full experience</p>
+
+```
+<iframe 
+  src="https://editor.p5js.org/yagmur2003namli/full/BAFGxmM2o"
+  width="800"
+  height="600"
+  allow="camera; microphone; fullscreen"
+></iframe>
+```
+
+  </div>
+</body>
+</html>
+
 </div>
   </head>
   <body>
