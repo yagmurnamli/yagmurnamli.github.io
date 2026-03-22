@@ -1,30 +1,75 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<link rel="icon" href="/favicon.png">
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>BUNRAKU</title>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.6.0/p5.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.6.0/addons/p5.sound.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/ml5@1.3.1/dist/ml5.min.js"></script>
+  <link rel="icon" href="/favicon.png">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BUNRAKU</title>
+
+  <!-- Kütüphaneler -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.6.0/p5.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.6.0/addons/p5.sound.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/ml5@1.3.1/dist/ml5.min.js"></script>
+
   <style>
-  body {
-    <a href="/" class="home-button">← Home</a>
-    <div id="canvas-container"></div>
-    display: flex;
-    justify-content: center;  /* yatayda ortala */
-    align-items: center;      /* dikeyde ortala */
-    height: 100vh;            /* tüm ekran yüksekliği */
-    margin: 0;                /* varsayılan boşlukları kaldır */
-    background-color: #000000; /* arka plan rengini oyuna göre */
-  }
-  canvas {
-    display: block;
-  }
-</style>
+    /* Sayfa ve canvas genel ayarları */
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      display: flex;
+      justify-content: center; /* yatayda ortala */
+      align-items: center;     /* dikeyde ortala */
+      background-color: #000;  /* oyun arkaplanı */
+      font-family: 'MaleriTrialSN', sans-serif;
+      color: #fff;
+      overflow: hidden;
+      position: relative;
+    }
+
+    /* Canvas container */
+    #canvas-container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      width: 100%;
+      height: 100%;
+    }
+
+    canvas {
+      display: block;
+      max-width: 100%;
+      max-height: 100%;
+    }
+
+    /* Home butonu */
+    .home-button {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      color: #fff;
+      text-decoration: none;
+      font-size: 18px;
+      background: rgba(0,0,0,0.5);
+      padding: 8px 12px;
+      border-radius: 5px;
+      z-index: 10;
+    }
+
+    .home-button:hover {
+      background: rgba(255,255,255,0.2);
+    }
+  </style>
 </head>
+
 <body>
-<script src="sketch.js"></script>
+  <!-- Ana sayfa butonu -->
+  <a href="/" class="home-button">← Home</a>
+
+  <!-- Canvas buraya gelecek -->
+  <div id="canvas-container"></div>
+
+  <!-- Sketch dosyası -->
+  <script type="module" src="sketch.js"></script>
 </body>
 </html>
