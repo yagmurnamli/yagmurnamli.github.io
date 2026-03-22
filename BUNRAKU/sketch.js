@@ -62,7 +62,7 @@ let startTypewriterTimer = 0;
 let typewriterDelay = 1500; // ms (1.5 saniye)
 
 function preload() {
-  sound = new Audio('sound/Bunraku puppet theatre.mp3');
+  sound = new Audio('sound/start.mp3');
   classifier = ml5.imageClassifier(modelURL + "model.json");
   img1 = loadImage("images/puppet1.png");
   img2 = loadImage("images/puppet2.png");
