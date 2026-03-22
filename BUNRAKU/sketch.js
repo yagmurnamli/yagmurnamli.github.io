@@ -2,61 +2,65 @@
 
 let video;
 let classifier;
-let modelURL = 'https://teachablemachine.withgoogle.com/models/ZlwamfTxu/'; // Teachable Machine model klasörünüz
 let label = "";
-let confidence = 0;
+let puppetImgs = [];
+let currentPuppet = 0;
+let puppetTimer = 0;
 
-let curtain = 0; // perde pozisyonu
-let curtainSpeed = 2; 
-let showCurtain = true;
+let scene = "intro"; // intro -> curtain -> puppet
+let startButtonPressed = false;
 
-let subtitleIndex = 0;
-let subtitles = ["Welcome to BUNRAKU", "Move your hands to interact!"];
-let subtitleTimer = 0;
-let subtitleDelay = 2000;
-
-let puppetImgs = []; // 4 pozu tutacak dizi
-let puppetX, puppetY;
-let puppetPose = 0; // 0,1,2,3 -> pozu belirler
-
+// Audio
 let startSound;
 
-let gameStarted = false;
+let subtitles = [
+  "Welcome to the world of Bunraku...",
+  "Watch closely as the puppets come alive."
+];
+let subtitleIndex = 0;
+let subtitleTimer = 0;
+let showSubtitle = false;
 
 function preload() {
-  // Ses dosyası
-  startSound = loadSound('start.mp3');
+  // Kukla pozlarını yükle
+  for (let i = 1; i <= 4; i++) {
+    puppetImgs.push(loadImage(`puppet${i}.png`));
+  }
 
-  // Kukla pozları
-  puppetImgs[0] = loadImage('puppet1.png');
-  puppetImgs[1] = loadImage('puppet2.png');
-  puppetImgs[2] = loadImage('puppet3.png');
-  puppetImgs[3] = loadImage('puppet4.png');
+  // Ses eski Audio() ile
+  startSound = new Audio('start.mp3');
 }
 
 function setup() {
   createCanvas(800, 600);
-  
+
   video = createCapture(VIDEO);
   video.size(320, 240);
   video.hide();
 
-  // Teachable Machine modelini yükle
-  classifier = ml5.imageClassifier(modelURL + 'model.json', video, modelReady);
-
-  puppetX = width / 2;
-  puppetY = height - 200;
+  // Teachable Machine modeli
+  classifier = ml5.imageClassifier('model.json', video, modelReady);
 
   textAlign(CENTER, CENTER);
   textSize(32);
+  fill(255);
+
+  // Başlatma butonu
+  let btn = createButton("START");
+  btn.position(width / 2 - 50, height / 2 + 100);
+  btn.mousePressed(() => {
+    startButtonPressed = true;
+    startSound.play();
+    scene = "curtain";
+    subtitleTimer = millis() + 1000; // 1 saniye sonra altyazı başlasın
+  });
 }
 
 function modelReady() {
-  console.log("Model loaded!");
+  console.log("Model ready!");
   classifyVideo();
 }
 
-// ML5 sınıflandırma
 function classifyVideo() {
   classifier.classify(gotResults);
 }
@@ -66,15 +70,7 @@ function gotResults(error, results) {
     console.error(error);
     return;
   }
-  
   label = results[0].label;
-  confidence = results[0].confidence;
-
-  // Kukla hareketlerini pozlara eşle
-  if (label === "MoveLeft") puppetPose = 1;
-  else if (label === "MoveRight") puppetPose = 2;
-  else if (label === "Jump") puppetPose = 3;
-  else puppetPose = 0; // idle
 
   classifyVideo(); // sürekli sınıflandır
 }
@@ -82,49 +78,46 @@ function gotResults(error, results) {
 function draw() {
   background(0);
 
-  // BUNRAKU yazısı
-  if (!gameStarted) {
+  if (scene === "intro") {
     fill(255);
-    text("BUNRAKU", width/2, height/2);
-  }
+    text("BUNRAKU", width / 2, height / 2);
+  } else if (scene === "curtain") {
+    // Perde animasyonu (basit olarak siyah üstte)
+    fill(0);
+    rect(0, 0, width, height);
 
-  // Perde açılıyor
-  if (showCurtain) {
-    fill(100);
-    rect(0, 0, width, curtain);
-    rect(0, height - curtain, width, curtain);
-    
-    curtain += curtainSpeed;
-    if (curtain > height/2) {
-      showCurtain = false;
-      gameStarted = true;
-      subtitleTimer = millis(); // altyazıyı başlat
+    // Altyazı gecikmeli gösterim
+    if (millis() > subtitleTimer && subtitleIndex < subtitles.length) {
+      showSubtitle = true;
+      fill(255);
+      text(subtitles[subtitleIndex], width / 2, height - 100);
+      if (millis() - subtitleTimer > 3000) { // her altyazı 3 sn
+        subtitleIndex++;
+        subtitleTimer = millis() + 500; // 0.5 sn ara
+      }
+    }
+
+    // Altyazılar bitince kukla sahnesine geç
+    if (subtitleIndex >= subtitles.length) {
+      scene = "puppet";
+      puppetTimer = millis();
+    }
+  } else if (scene === "puppet") {
+    // Kukla animasyonu (nefes alma gibi poz değişimi)
+    if (millis() - puppetTimer > 500) { // 0.5 saniyede bir poz değiş
+      currentPuppet = (currentPuppet + 1) % puppetImgs.length;
+      puppetTimer = millis();
+    }
+    image(puppetImgs[currentPuppet], width / 2 - 100, height / 2 - 200, 200, 400);
+
+    // ML hareketlerini kontrol et
+    if (label === "move" || label === "jump") { // modeline göre değiştir
+      fill(0, 255, 0);
+      text("You did a move! Scene progresses...", width / 2, height - 50);
+      // burada başka sahneye geçiş veya oyun mantığı eklenebilir
     }
   }
 
-  // Altyazılar perdeden sonra
-  if (gameStarted && subtitleIndex < subtitles.length) {
-    fill(255);
-    text(subtitles[subtitleIndex], width/2, 50);
-    if (millis() - subtitleTimer > subtitleDelay) {
-      subtitleIndex++;
-      subtitleTimer = millis();
-    }
-  }
-
-  // Kukla çizimi
-  drawPuppet();
-}
-
-function drawPuppet() {
-  if (!puppetImgs[puppetPose]) return;
-
-  image(puppetImgs[puppetPose], puppetX - puppetImgs[puppetPose].width/2, puppetY - puppetImgs[puppetPose].height/2);
-}
-
-// Kullanıcı etkileşimi ile sesi başlat
-function mousePressed() {
-  if (!startSound.isPlaying()) {
-    startSound.play();
-  }
+  // Video küçük kutuda göster (debug için)
+  image(video, 10, 10, 160, 120);
 }
