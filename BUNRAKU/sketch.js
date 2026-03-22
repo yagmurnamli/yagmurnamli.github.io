@@ -75,7 +75,7 @@ function preload() {
 function setup() {
   createCanvas(700, 700);
   textFont(customFont);
-  imageMode(CORNER);
+  imageMode(CENTER);
 
   video = createCapture(VIDEO);
   video.size(160, 120);
@@ -182,7 +182,7 @@ function draw() {
 
   if (scene5Displayed) scene5();
 
-  image(video, 300, 300);
+  image(video, -300, -300);
 }
 
 function scene1() {
