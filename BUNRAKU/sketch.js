@@ -1,6 +1,5 @@
-/* vcd436s24 - Project (4/4): Submission
-  @yagmurnamli
-   Last update: June 05
+/* @yagmurnamli
+   Last update: March 22 2026
    Project Name: "BUNRAKU"
    Explanation: A Japanese puppet, Bunraku, is holding a key. Can you take it or not? An interactive experience based on Teachable Machine and player gestures.
 */
