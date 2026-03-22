@@ -3,7 +3,7 @@ html, body {
   margin: 0;
   padding: 0;
   height: 100%;
-  background-color: #081010; /* BUNRAKU oyunundaki koyu arka plan */
+  background-color: #414545; /* BUNRAKU oyunundaki koyu arka plan */
   display: flex;
   justify-content: center;   /* canvas yatay ortalanır */
   align-items: center;       /* canvas dikey ortalanır */
