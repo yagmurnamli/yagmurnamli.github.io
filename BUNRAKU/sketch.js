@@ -16,7 +16,7 @@ let img1, img2, img3, img4, cur1, cur2;
 let button;
 // Curtains
 let cur1X, cur2X, targetCur1X, targetCur2X;
-let curtainSpeed = 2;
+let curtainSpeed = 3;
 let curtainsOpen = false;
 
 // Font
@@ -147,7 +147,7 @@ function draw() {
 
   scene1();
 
-  if (curtainsOpen = true) {
+  if (curtainsOpen) {
     scene2();
   }
 
