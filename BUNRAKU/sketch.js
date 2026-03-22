@@ -1,8 +1,7 @@
-/* vcd436s24 - Project (4/4): Submission
-  @yagmurnamli
-   last update: June 05
+/* @yagmurnamli
+   last update: March 22 2026
    Project Name: "BUNRAKU"
-   Explanation: A Japanese puppet, Bunraku, is holding a key, can you take it or not? An interactive experience based on Teachable Machine and player gestures.
+   Explanation: A Japanese puppet, Bunraku, is holding a key. Can you take it or not? An interactive experience based on Teachable Machine and player gestures.
 */
 
 let sound;
@@ -45,7 +44,7 @@ let scene5TextOpacity = 0;
 let fullText = "Welcome, foolish mortal. You seek the key, do you? It holds power beyond your comprehension. But do you dare to claim it? I am the guardian, the puppet master. Face me if you dare, but beware, the consequences may be dire.";
 let displayedText = "";
 let charIndex = 0;
-let typingSpeed = 80;
+let typingSpeed = 85;
 let typewriterInterval;
 
 // Breathing
@@ -55,11 +54,11 @@ let breathingAmplitude = 10;
 
 // Title
 let titleOpacity = 255;
-let titleFadeSpeed = 0;
+let titleFadeSpeed = 1;
 
 // Typewriter delay
 let startTypewriterTimer = 0;
-let typewriterDelay = 1500; // ms (1.5 saniye)
+let typewriterDelay = 2000; // ms (2 saniye)
 
 function preload() {
   sound = new Audio('sound/start.mp3');
@@ -153,7 +152,7 @@ function draw() {
     if (startTypewriterTimer === 0) {
       startTypewriterTimer = millis(); // Timer başlat
     } else if (!typewriterInterval && millis() - startTypewriterTimer >= typewriterDelay) {
-      // 1.5 saniye geçti, typewriter başlasın
+      // 2 saniye geçti, typewriter başlasın
       typewriterInterval = setInterval(typeWriter, typingSpeed);
     }
   }
@@ -186,7 +185,7 @@ function draw() {
 
   if (scene5Displayed) scene5();
 
-  image(video, 330, 250);
+  image(video, 20, 20);
 }
 
 function scene1() {
