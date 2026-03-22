@@ -180,7 +180,7 @@ function draw() {
 
   scene1();
 
-  if (titleOpacity <= 0) {
+  if (curtainsOpen) {
     scene2();
   }
 
