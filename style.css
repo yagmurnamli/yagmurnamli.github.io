@@ -1,0 +1,19 @@
+/* Sayfa ve canvas genel ayarları */
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  background-color: #081010; /* BUNRAKU oyunundaki koyu arka plan */
+  display: flex;
+  justify-content: center;   /* canvas yatay ortalanır */
+  align-items: center;       /* canvas dikey ortalanır */
+  font-family: 'MaleriTrialSN', sans-serif; /* oyun fontu */
+  color: #fff;               /* yazılar beyaz */
+  overflow: hidden;          /* kaydırma çubuğunu gizle */
+}
+
+/* Fontu web sayfasında kullanmak için @font-face */
+@font-face {
+  font-family: 'MaleriTrialSN';
+  src: url('font/MaleriTrialSN-Book.otf') format('opentype');
+}
