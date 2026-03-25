@@ -95,7 +95,8 @@ function setup() {
   video = createCapture(VIDEO);
   video.size(160, 120);
   video.hide();
-
+  video.position((width + video.width) / 2, (height - video.height) / 2);
+  
   // Initialize curtain positions
   cur1X = width / 2;
   cur2X = width / 2;
