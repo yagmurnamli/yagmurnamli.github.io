@@ -163,6 +163,7 @@ function drawScene5() {
 
   if (overRect(width / 2, height / 2, 200, 200)) {
     image(eyes, width / 2, height / 2, 500, 500);
+    image(grassBackyard, width / 2, height / 2 + 50);
 
     if (!jumpscare.isPlaying()) jumpscare.play();
   }
