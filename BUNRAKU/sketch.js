@@ -109,7 +109,7 @@ function setup() {
   button.style("border", "none"); // Remove border
   button.style("cursor", "pointer"); // Change cursor to pointer
   button.style("font-family", customFont); // Set custom font for button
-  button.position((width - button.width) / 2, height / 2); // Center the button
+  button.position(width, height / 2); // Center the button
   button.mousePressed(openCurtains);
 
   // Add pulsing animation
