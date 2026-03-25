@@ -69,7 +69,7 @@ let breathingAmplitude = 10;
 let fullText = "Welcome, foolish mortal. You seek the key, do you? It holds power beyond your comprehension. But do you dare to claim it? I am the guardian, the puppet master. Face me if you dare, but beware, the consequences may be dire.";
 let displayedText = "";
 let charIndex = 0;
-let typingSpeed = 80;
+let typingSpeed = 20;
 
 // STEP 1: Load the model!
 function preload() {
