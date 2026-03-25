@@ -33,8 +33,8 @@ let curtainsOpen = false;
 // Font
 let customFont;
 
-
 let scene2StartTime;
+let typewriterStarted = false;
 let typewriterFinished = false;
 let switchTime;
 let shakeStartTime;
@@ -270,7 +270,7 @@ function scene2() {
   fill(255);
   let wrappedText = wordWrap(displayedText, width - 40);
   text(wrappedText, 20, height / 2 + 150);
-  
+  typewriterStarted = true;
   
 }
 
@@ -295,10 +295,10 @@ function wordWrap(str, maxWidth) {
 }
 
 function typeWriter() {
-  if (charIndex < fullText.length) {
+  if (charIndex < fullText.length && typewriterStarted) {
     displayedText += fullText.charAt(charIndex);
     charIndex++;
-  } else {
+  } else if (typewriterStarted){
     typewriterFinished = true;
   }
 }
