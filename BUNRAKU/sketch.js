@@ -177,9 +177,9 @@ function draw() {
   scene1();
 
   if (titleOpacity <= 0) {
-    scene2();
      // Start the typewriter effect
      setInterval(typeWriter, typingSpeed);
+    scene2();
   }
 
   if (typewriterFinished) {
