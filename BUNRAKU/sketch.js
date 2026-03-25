@@ -177,8 +177,9 @@ function draw() {
   scene1();
 
   if (titleOpacity <= 0) {
-     // Start the typewriter effect
-     setInterval(typeWriter, typingSpeed);
+    typewriterStarted = true;
+    // Start the typewriter effect
+    setInterval(typeWriter, typingSpeed);
     scene2();
   }
 
@@ -270,7 +271,6 @@ function scene2() {
   fill(255);
   let wrappedText = wordWrap(displayedText, width - 40);
   text(wrappedText, 20, height / 2 + 150);
-  typewriterStarted = true;
   
 }
 
