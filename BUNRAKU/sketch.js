@@ -34,7 +34,7 @@ let curtainsOpen = false;
 // Font
 let customFont;
 
-
+let typewriterStarted = false;
 let scene2StartTime;
 let typewriterFinished = false;
 let switchTime;
@@ -110,7 +110,7 @@ function setup() {
   button.style("border", "none"); // Remove border
   button.style("cursor", "pointer"); // Change cursor to pointer
   button.style("font-family", customFont); // Set custom font for button
-  button.position((width - button.width) / 2, height / 2); // Center the button
+  button.position(width, height / 2); // Center the button
   button.mousePressed(openCurtains);
 
   // Add pulsing animation
@@ -181,6 +181,7 @@ function draw() {
   scene1();
 
   if (titleOpacity <= 0) {
+    typewriterStarted = true;
     scene2();
   }
 
@@ -298,11 +299,13 @@ function wordWrap(str, maxWidth) {
 }
 
 function typeWriter() {
-  if (charIndex < fullText.length) {
-    displayedText += fullText.charAt(charIndex);
-    charIndex++;
-  } else {
-    typewriterFinished = true;
+  if (typewriterStarted) {
+      if (charIndex < fullText.length) {
+      displayedText += fullText.charAt(charIndex);
+      charIndex++;
+    } else {
+      typewriterFinished = true;
+    }
   }
 }
 
