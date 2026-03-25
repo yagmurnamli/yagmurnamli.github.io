@@ -128,9 +128,6 @@ function setup() {
   styleSheet.innerText = pulseAnimation;
   document.head.appendChild(styleSheet);
 
-  // Start the typewriter effect
-  setInterval(typeWriter, typingSpeed);
-
   // STEP 2: Start classifying
   classifyVideo();
 }
@@ -181,6 +178,8 @@ function draw() {
 
   if (titleOpacity <= 0) {
     scene2();
+     // Start the typewriter effect
+     setInterval(typeWriter, typingSpeed);
   }
 
   if (typewriterFinished) {
