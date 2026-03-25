@@ -28,14 +28,15 @@ let button;
 // Position variables for curtains
 let cur1X, cur2X;
 let targetCur1X, targetCur2X;
-let curtainSpeed = 2;
+let curtainSpeed = 1.5;
 let curtainsOpen = false;
 
 // Font
 let customFont;
 
 let typewriterStarted = false;
-let scene2StartTime;
+let scene2StartTime = 0;
+let scene2WaitTime = 1500;
 let typewriterFinished = false;
 let switchTime;
 let shakeStartTime;
@@ -144,7 +145,7 @@ function openCurtains() {
     curtainsOpen = true;
     button.hide();
     clear();
-    titleFadeSpeed = 1.9;
+    titleFadeSpeed = 1.5;
   }
 }
 
@@ -181,8 +182,13 @@ function draw() {
   scene1();
 
   if (titleOpacity <= 0) {
-    typewriterStarted = true;
-    scene2();
+    if (scene2StartTime == 0) {
+      scene2StartTime = millis();
+    }
+    else if (millis() - scene2StartTime >= scene2WaitTime) {
+      typewriterStarted = true;
+      scene2();
+    }
   }
 
   if (typewriterFinished) {
