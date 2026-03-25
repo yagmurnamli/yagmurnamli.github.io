@@ -1,8 +1,9 @@
-/* @yagmurnamli
-   Last update: March 23 2026
+/* vcd436s24 - Project (4/4): Submission
+  @yagmurnamli
+   last update: June 05
    Project Name: "BUNRAKU"
-   Explanation: A Japanese puppet, Bunraku, is holding a key. Can you take it or not? An interactive experience based on Teachable Machine and player gestures.
-. Inspiration: 
+   Explanation: A Japanese puppet, Bunraku, is holding a key, can you take it or not? An interactive experience based on Teachable Machine and player gestures.
+. Sources: 
 - https://www.youtube.com/watch?v=kwcillcWOg0&t=6s&ab_channel=TheCodingTrain
 - https://editor.p5js.org/codingtrain/sketches/PoZXqbu4v
 . when encountered with the puppet, try reaching for the camera, or come closer to it.
@@ -33,8 +34,8 @@ let curtainsOpen = false;
 // Font
 let customFont;
 
+
 let scene2StartTime;
-let typewriterStarted = false;
 let typewriterFinished = false;
 let switchTime;
 let shakeStartTime;
@@ -69,7 +70,7 @@ let breathingAmplitude = 10;
 let fullText = "Welcome, foolish mortal. You seek the key, do you? It holds power beyond your comprehension. But do you dare to claim it? I am the guardian, the puppet master. Face me if you dare, but beware, the consequences may be dire.";
 let displayedText = "";
 let charIndex = 0;
-let typingSpeed = 20;
+let typingSpeed = 80;
 
 // STEP 1: Load the model!
 function preload() {
@@ -109,7 +110,7 @@ function setup() {
   button.style("border", "none"); // Remove border
   button.style("cursor", "pointer"); // Change cursor to pointer
   button.style("font-family", customFont); // Set custom font for button
-  button.position(width, height / 2); // Center the button
+  button.position((width - button.width) / 2, height / 2); // Center the button
   button.mousePressed(openCurtains);
 
   // Add pulsing animation
@@ -128,6 +129,9 @@ function setup() {
   styleSheet.innerText = pulseAnimation;
   document.head.appendChild(styleSheet);
 
+  // Start the typewriter effect
+  setInterval(typeWriter, typingSpeed);
+
   // STEP 2: Start classifying
   classifyVideo();
 }
@@ -140,7 +144,7 @@ function openCurtains() {
     curtainsOpen = true;
     button.hide();
     clear();
-    titleFadeSpeed = 0.8;
+    titleFadeSpeed = 1.9;
   }
 }
 
@@ -177,9 +181,6 @@ function draw() {
   scene1();
 
   if (titleOpacity <= 0) {
-    typewriterStarted = true;
-    // Start the typewriter effect
-    setInterval(typeWriter, typingSpeed);
     scene2();
   }
 
@@ -221,7 +222,7 @@ function draw() {
 }
 
 // STEP 3: Get the classification!
-function gotResults(error, results) {
+function gotResults(results, error) {
   // Something went wrong!
   if (error) {
     console.error(error);
@@ -230,6 +231,7 @@ function gotResults(error, results) {
   // Store the label and classify again!
   label = results[0].label;
   classifyVideo();
+  print(results);
 }
 
 function scene1() {
@@ -272,6 +274,7 @@ function scene2() {
   let wrappedText = wordWrap(displayedText, width - 40);
   text(wrappedText, 20, height / 2 + 150);
   
+  
 }
 
 // Function to handle word wrapping
@@ -295,10 +298,10 @@ function wordWrap(str, maxWidth) {
 }
 
 function typeWriter() {
-  if (charIndex < fullText.length && typewriterStarted) {
+  if (charIndex < fullText.length) {
     displayedText += fullText.charAt(charIndex);
     charIndex++;
-  } else if (typewriterStarted){
+  } else {
     typewriterFinished = true;
   }
 }
