@@ -1,233 +1,169 @@
 let metaballShader;
 let balls = [];
 
-let typedText = "hello";
-let isAnimating = false;
+let state = "idle"; // "idle" | "explode"
 
-let originX = 100;
-let originY = 140;
-let cellSize = 22;
-let gap = 4;
-let letterSpacing = 140;
+let word = "hello";
+let gridSize = 12;
+let spacing = 20;
 
-const MAX_BALLS = 128;
+const MAX_BALLS = 256;
 
-// --- SHADER ---
-
+// SHADER
 const vert = `
 attribute vec3 aPosition;
-uniform float width;
-uniform float height;
 varying vec2 vPos;
 
 void main() {
+  vPos = (aPosition.xy + 1.0) * 0.5;
   gl_Position = vec4(aPosition, 1.0);
-  vPos = vec2((gl_Position.x + 1.0) * 0.5 * width,
-              (gl_Position.y + 1.0) * 0.5 * height);
 }
 `;
 
 const frag = `
 precision highp float;
 
-#define BALLS 128
+#define MAX 256
 
-uniform float xs[BALLS];
-uniform float ys[BALLS];
-uniform float rs[BALLS];
+uniform int count;
+uniform float xs[MAX];
+uniform float ys[MAX];
+uniform float rs[MAX];
 
 varying vec2 vPos;
 
 void main() {
   float sum = 0.0;
 
-  for (int i = 0; i < BALLS; i++) {
+  for(int i = 0; i < MAX; i++){
+    if(i >= count) break;
+
     float dx = xs[i] - vPos.x;
     float dy = ys[i] - vPos.y;
     float d = length(vec2(dx, dy));
+
     sum += rs[i] / d;
   }
 
-  if (sum > 11.0) {
-    gl_FragColor = vec4(0.4, 0.0, 0.0, 0.9);
+  if(sum > 12.0){
+    gl_FragColor = vec4(0.3, 0.0, 0.0, 1.0);
   } else {
-    float s = 0.5 - smoothstep(0.0, 1.5, abs(sum - 11.0));
-    vec3 col = mix(vec3(0.0), vec3(0.4, 0.0, 0.0), s);
-    gl_FragColor = vec4(col, 1.0);
+    gl_FragColor = vec4(0.0);
   }
 }
 `;
 
-// --- SETUP ---
-
 function setup() {
-  createCanvas(window.innerWidth, window.innerHeight, WEBGL);
-  noStroke();
+  createCanvas(600, 600, WEBGL);
 
   metaballShader = createShader(vert, frag);
   shader(metaballShader);
 
-  metaballShader.setUniform("width", width);
-  metaballShader.setUniform("height", height);
-
-  generateWord(typedText);
+  generateWord(word);
 }
-
-// --- DRAW ---
 
 function draw() {
   background(0);
 
-  let xs = new Array(MAX_BALLS).fill(0);
-  let ys = new Array(MAX_BALLS).fill(0);
-  let rs = new Array(MAX_BALLS).fill(0);
+  let xs = [];
+  let ys = [];
+  let rs = [];
 
-  for (let i = 0; i < min(balls.length, MAX_BALLS); i++) {
-    xs[i] = balls[i].x;
-    ys[i] = balls[i].y;
-    rs[i] = balls[i].r;
+  for (let b of balls) {
+    b.update();
+
+    xs.push(b.x / width);
+    ys.push(1.0 - b.y / height);
+    rs.push(b.r / width);
   }
 
+  metaballShader.setUniform("count", balls.length);
   metaballShader.setUniform("xs", xs);
   metaballShader.setUniform("ys", ys);
   metaballShader.setUniform("rs", rs);
 
   quad(-1, -1, 1, -1, 1, 1, -1, 1);
+}
 
-  for (let b of balls) {
-    b.update();
+// HARF OLUŞTUR
+function generateWord(txt) {
+  balls = [];
+
+  let startX = 80;
+  let startY = 150;
+
+  for (let k = 0; k < txt.length; k++) {
+    let char = txt[k];
+
+    for (let i = 0; i < gridSize; i++) {
+      for (let j = 0; j < gridSize; j++) {
+        if (random() < 0.4) continue;
+
+        let x = startX + k * 80 + i * spacing;
+        let y = startY + j * spacing;
+
+        balls.push(new Ball(x, y));
+      }
+    }
   }
 }
 
-// --- WORD GENERATION ---
+// BALL CLASS
+class Ball {
+  constructor(x, y) {
+    this.baseX = x;
+    this.baseY = y;
 
-function generateWord(word) {
-  balls = [];
+    this.x = x;
+    this.y = y;
 
-  word = word.toLowerCase();
+    this.r = 20;
 
-  for (let k = 0; k < word.length; k++) {
-    let letter = letterData[word[k]];
-    if (!letter) continue;
+    this.angle = random(TWO_PI);
 
-    for (let i = 0; i < letter.length; i++) {
-      for (let j = 0; j < letter[i].length; j++) {
+    this.vx = random(-3, 3);
+    this.vy = random(-3, 3);
+  }
 
-        if (letter[i][j] === 1) {
-          let x = originX + j * (cellSize + gap) + k * letterSpacing;
-          let y = height - (originY + i * (cellSize + gap));
+  update() {
+    if (state === "idle") {
+      // SABİT + PULSING
+      this.x = this.baseX;
+      this.y = this.baseY;
 
-          balls.push(new Ball(x, y));
+      this.angle += 0.05;
+      this.r = 18 + sin(this.angle) * 4;
+    }
+
+    if (state === "explode") {
+      // DAĞILMA
+      this.x += this.vx;
+      this.y += this.vy;
+
+      // bounce
+      if (this.x < 0 || this.x > width) this.vx *= -1;
+      if (this.y < 0 || this.y > height) this.vy *= -1;
+
+      // metaball etkisi
+      for (let other of balls) {
+        if (other === this) continue;
+
+        let dx = other.x - this.x;
+        let dy = other.y - this.y;
+        let d = sqrt(dx * dx + dy * dy);
+
+        if (d > 0) {
+          this.vx += dx / (d * 50);
+          this.vy += dy / (d * 50);
         }
       }
     }
   }
 }
 
-// --- INPUT ---
-
-function keyTyped() {
-  if (key === ' ') {
-    typedText += " ";
-  } else if (/[a-z]/.test(key)) {
-    typedText += key;
-  }
-
-  isAnimating = false;
-  generateWord(typedText);
-}
-
+// ENTER → DAĞIL
 function keyPressed() {
-
   if (keyCode === ENTER) {
-    isAnimating = true;
-  }
-
-  if (key === 'r') {
-    isAnimating = false;
-    generateWord(typedText);
-  }
-
-  if (keyCode === BACKSPACE) {
-    typedText = typedText.slice(0, -1);
-    isAnimating = false;
-    generateWord(typedText);
+    state = "explode";
   }
 }
-
-// --- RESIZE ---
-
-function windowResized() {
-  resizeCanvas(window.innerWidth, window.innerHeight);
-}
-
-// --- BALL CLASS ---
-
-class Ball {
-  constructor(x, y) {
-    this.homeX = x;
-    this.homeY = y;
-
-    this.x = x;
-    this.y = y;
-
-    let angle = random(TWO_PI);
-    let speed = 2;
-
-    this.vx = cos(angle) * speed;
-    this.vy = sin(angle) * speed;
-
-    this.r = random(20, 30);
-  }
-
-  update() {
-
-    // SABİT HAL
-    if (!isAnimating) {
-      this.x += (this.homeX - this.x) * 0.1;
-      this.y += (this.homeY - this.y) * 0.1;
-      return;
-    }
-
-    // DAĞILMA
-    this.x += this.vx;
-    this.y += this.vy;
-
-    if (this.x < 0 || this.x > width) this.vx *= -1;
-    if (this.y < 0 || this.y > height) this.vy *= -1;
-
-    this.vx += random(-0.05, 0.05);
-    this.vy += random(-0.05, 0.05);
-  }
-}
-
-// --- FULL ALPHABET ---
-
-const letterData = {
-  a:[[0,1,1,0],[1,0,0,1],[1,1,1,1],[1,0,0,1]],
-  b:[[1,1,0],[1,0,1],[1,1,0],[1,0,1],[1,1,0]],
-  c:[[0,1,1],[1,0,0],[1,0,0],[0,1,1]],
-  d:[[1,1,0],[1,0,1],[1,0,1],[1,0,1],[1,1,0]],
-  e:[[1,1,1],[1,0,0],[1,1,0],[1,0,0],[1,1,1]],
-  f:[[1,1,1],[1,0,0],[1,1,0],[1,0,0],[1,0,0]],
-  g:[[0,1,1],[1,0,0],[1,0,1],[1,0,1],[0,1,1]],
-  h:[[1,0,1],[1,0,1],[1,1,1],[1,0,1],[1,0,1]],
-  i:[[1,1,1],[0,1,0],[0,1,0],[0,1,0],[1,1,1]],
-  j:[[0,1,1],[0,0,1],[0,0,1],[1,0,1],[0,1,0]],
-  k:[[1,0,1],[1,1,0],[1,0,0],[1,1,0],[1,0,1]],
-  l:[[1,0,0],[1,0,0],[1,0,0],[1,0,0],[1,1,1]],
-  m:[[1,0,1],[1,1,1],[1,1,1],[1,0,1],[1,0,1]],
-  n:[[1,0,1],[1,1,1],[1,1,1],[1,1,1],[1,0,1]],
-  o:[[0,1,0],[1,0,1],[1,0,1],[1,0,1],[0,1,0]],
-  p:[[1,1,0],[1,0,1],[1,1,0],[1,0,0],[1,0,0]],
-  q:[[0,1,0],[1,0,1],[1,0,1],[0,1,0],[0,0,1]],
-  r:[[1,1,0],[1,0,1],[1,1,0],[1,1,0],[1,0,1]],
-  s:[[0,1,1],[1,0,0],[0,1,0],[0,0,1],[1,1,0]],
-  t:[[1,1,1],[0,1,0],[0,1,0],[0,1,0],[0,1,0]],
-  u:[[1,0,1],[1,0,1],[1,0,1],[1,0,1],[1,1,1]],
-  v:[[1,0,1],[1,0,1],[1,0,1],[0,1,0],[0,1,0]],
-  w:[[1,0,1],[1,0,1],[1,1,1],[1,1,1],[1,0,1]],
-  x:[[1,0,1],[0,1,0],[0,1,0],[0,1,0],[1,0,1]],
-  y:[[1,0,1],[0,1,0],[0,1,0],[0,1,0],[0,1,0]],
-  z:[[1,1,1],[0,0,1],[0,1,0],[1,0,0],[1,1,1]]
-};
