@@ -11,6 +11,9 @@ let letterSpacing = 140;
 
 const MAX_BALLS = 128;
 
+// --- STATE ---
+let mode = "pulse"; // "pulse" | "scatter"
+
 // --- SHADER ---
 
 const vert = `
@@ -111,7 +114,6 @@ function generateWord(word) {
 
     for (let i = 0; i < letter.length; i++) {
       for (let j = 0; j < letter[i].length; j++) {
-
         if (letter[i][j] === 1) {
           let x = originX + j * (cellSize + gap) + k * letterSpacing;
           let y = height - (originY + i * (cellSize + gap));
@@ -142,8 +144,7 @@ function keyPressed() {
   }
 
   if (keyCode === ENTER) {
-    typedText = "";
-    generateWord(typedText);
+    mode = "scatter"; // ENTER ile toplar dağılacak
   }
 }
 
@@ -166,22 +167,33 @@ class Ball {
     this.vx = cos(angle) * speed;
     this.vy = sin(angle) * speed;
 
-    this.r = random(20, 30);
+    this.baseR = random(20, 30); // pulsing için temel yarıçap
+    this.r = this.baseR;
+    this.phase = random(TWO_PI); // pulsing fazı
   }
 
   update() {
-    this.x += this.vx;
-    this.y += this.vy;
+    if (mode === "pulse") {
+      // sadece radius değişir
+      this.r = this.baseR + sin(frameCount * 0.1 + this.phase) * 5;
+      return;
+    }
 
-    if (this.x < 0 || this.x > width) this.vx *= -1;
-    if (this.y < 0 || this.y > height) this.vy *= -1;
+    if (mode === "scatter") {
+      // hareket
+      this.x += this.vx;
+      this.y += this.vy;
 
-    this.vx += random(-0.05, 0.05);
-    this.vy += random(-0.05, 0.05);
+      if (this.x < 0 || this.x > width) this.vx *= -1;
+      if (this.y < 0 || this.y > height) this.vy *= -1;
+
+      this.vx += random(-0.05, 0.05);
+      this.vy += random(-0.05, 0.05);
+    }
   }
 }
 
-// --- FULL ALPHABET (compact grid) ---
+// --- FULL ALPHABET  ---
 
 const letterData = {
   a: [
