@@ -114,7 +114,7 @@ function drawButton() {
     tint(hoverTintColor);
   }
 
-  image(buttonImage, width / 2 + xOffset, height / 2 + yOffset);
+  //image(buttonImage, width / 2 + xOffset, height / 2 + yOffset);
   noTint();
 }
 
