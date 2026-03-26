@@ -1,147 +1,189 @@
-let points = [];
-let inputText = "hello";
+let metaballShader;
+let balls = [];
 
-let state = "idle"; // idle | scatter
+let typedText = "hello";
 
-let spacing = 10;
-let letterSpacing = 25;
-let resolution = 8; // metaball çözünürlük (düşük = hızlı)
+let originX = 100;
+let originY = 120;
+let cellSize = 20;
+let gap = 4;
+let letterSpacing = 140;
+
+const MAX_BALLS = 128;
+
+// --- SHADER ---
+
+const vert = `
+attribute vec3 aPosition;
+uniform float width;
+uniform float height;
+varying vec2 vPos;
+
+void main() {
+  gl_Position = vec4(aPosition, 1.0);
+  vPos = vec2((gl_Position.x + 1.0) * 0.5 * width,
+              (gl_Position.y + 1.0) * 0.5 * height);
+}
+`;
+
+const frag = `
+precision highp float;
+
+#define BALLS 128
+
+uniform float xs[BALLS];
+uniform float ys[BALLS];
+uniform float rs[BALLS];
+
+varying vec2 vPos;
+
+void main() {
+  float sum = 0.0;
+
+  for (int i = 0; i < BALLS; i++) {
+    float dx = xs[i] - vPos.x;
+    float dy = ys[i] - vPos.y;
+    float d = length(vec2(dx, dy));
+    sum += rs[i] / d;
+  }
+
+  if (sum > 11.0) {
+    gl_FragColor = vec4(0.4, 0.0, 0.0, 0.9);
+  } else {
+    float smoothness = 0.5 - smoothstep(0.0, 1.5, abs(sum - 11.0));
+    vec3 color = mix(vec3(0.0), vec3(0.4, 0.0, 0.0), smoothness);
+    gl_FragColor = vec4(color, 1.0);
+  }
+}
+`;
+
+// --- SETUP ---
 
 function setup() {
-  createCanvas(windowWidth, windowHeight);
-  pixelDensity(1);
-  generateText(inputText);
+  createCanvas(window.innerWidth, window.innerHeight, WEBGL);
+  noStroke();
+
+  metaballShader = createShader(vert, frag);
+  shader(metaballShader);
+
+  metaballShader.setUniform("width", width);
+  metaballShader.setUniform("height", height);
+
+  generateWord(typedText);
 }
+
+// --- DRAW ---
 
 function draw() {
-  background(255);
+  background(0);
 
-  updatePoints();
-  drawMetaballs();
-}
+  let xs = new Array(MAX_BALLS).fill(0);
+  let ys = new Array(MAX_BALLS).fill(0);
+  let rs = new Array(MAX_BALLS).fill(0);
 
-// =========================
-// INPUT
-// =========================
-function keyPressed() {
-  if (keyCode === ENTER) {
-    state = "scatter";
-    for (let p of points) p.scatter();
+  for (let i = 0; i < min(balls.length, MAX_BALLS); i++) {
+    xs[i] = balls[i].x;
+    ys[i] = balls[i].y;
+    rs[i] = balls[i].r;
   }
 
-  if (keyCode === BACKSPACE) {
-    inputText = inputText.slice(0, -1);
-    generateText(inputText);
+  metaballShader.setUniform("xs", xs);
+  metaballShader.setUniform("ys", ys);
+  metaballShader.setUniform("rs", rs);
+
+  quad(-1, -1, 1, -1, 1, 1, -1, 1);
+
+  for (let b of balls) {
+    b.update();
   }
 }
+
+// --- WORD GENERATION ---
+
+function generateWord(word) {
+  balls = [];
+
+  word = word.toLowerCase();
+
+  for (let k = 0; k < word.length; k++) {
+    let letter = letterData[word[k]];
+    if (!letter) continue;
+
+    for (let i = 0; i < letter.length; i++) {
+      for (let j = 0; j < letter[i].length; j++) {
+
+        if (letter[i][j] === 1) {
+          let x = originX + j * (cellSize + gap) + k * letterSpacing;
+          let y = height - (originY + i * (cellSize + gap));
+
+          balls.push(new Ball(x, y));
+        }
+      }
+    }
+  }
+}
+
+// --- INPUT ---
 
 function keyTyped() {
-  if (key.length === 1) {
-    inputText += key.toLowerCase();
-    generateText(inputText);
+  if (key === ' ') {
+    typedText += " ";
+  } else if (/[a-z]/.test(key)) {
+    typedText += key;
+  }
+
+  generateWord(typedText);
+}
+
+function keyPressed() {
+  if (keyCode === BACKSPACE) {
+    typedText = typedText.slice(0, -1);
+    generateWord(typedText);
+  }
+
+  if (keyCode === ENTER) {
+    typedText = "";
+    generateWord(typedText);
   }
 }
 
-// =========================
-// POINT CLASS
-// =========================
-class Point {
-  constructor(x, y) {
-    this.origin = createVector(x, y);
-    this.pos = this.origin.copy();
+// --- RESIZE ---
 
-    this.offset = random(1000);
-    this.vel = p5.Vector.random2D().mult(random(1, 3));
+function windowResized() {
+  resizeCanvas(window.innerWidth, window.innerHeight);
+}
+
+// --- BALL CLASS ---
+
+class Ball {
+  constructor(x, y) {
+    this.x = x;
+    this.y = y;
+
+    let angle = random(TWO_PI);
+    let speed = 2;
+
+    this.vx = cos(angle) * speed;
+    this.vy = sin(angle) * speed;
+
+    this.r = random(20, 30);
   }
 
   update() {
-    if (state === "idle") {
-      let pulse = sin(frameCount * 0.05 + this.offset) * 2;
-      this.pos.x = this.origin.x + pulse;
-      this.pos.y = this.origin.y + pulse;
-    } else {
-      this.pos.add(this.vel);
-    }
-  }
+    this.x += this.vx;
+    this.y += this.vy;
 
-  scatter() {
-    this.vel = p5.Vector.random2D().mult(random(2, 6));
+    if (this.x < 0 || this.x > width) this.vx *= -1;
+    if (this.y < 0 || this.y > height) this.vy *= -1;
+
+    this.vx += random(-0.05, 0.05);
+    this.vy += random(-0.05, 0.05);
   }
 }
 
-function updatePoints() {
-  for (let p of points) {
-    p.update();
-  }
-}
+// --- FULL ALPHABET (compact grid) ---
 
-// =========================
-// METABALL RENDER
-// =========================
-function drawMetaballs() {
-  loadPixels();
-
-  for (let x = 0; x < width; x += resolution) {
-    for (let y = 0; y < height; y += resolution) {
-      let sum = 0;
-
-      for (let p of points) {
-        let dx = x - (p.pos.x + width / 2);
-        let dy = y - (p.pos.y + height / 2);
-        let d = dx * dx + dy * dy;
-
-        sum += 1000 / d;
-      }
-
-      let col = sum > 1 ? 0 : 255;
-
-      for (let i = 0; i < resolution; i++) {
-        for (let j = 0; j < resolution; j++) {
-          let index = 4 * ((x + i) + (y + j) * width);
-          pixels[index] = col;
-          pixels[index + 1] = col;
-          pixels[index + 2] = col;
-          pixels[index + 3] = 255;
-        }
-      }
-    }
-  }
-
-  updatePixels();
-}
-
-// =========================
-// TEXT GENERATION
-// =========================
-function generateText(txt) {
-  points = [];
-  state = "idle";
-
-  let xOffset = -txt.length * 60;
-
-  for (let i = 0; i < txt.length; i++) {
-    let letter = txt[i];
-    let grid = font[letter];
-    if (!grid) continue;
-
-    for (let y = 0; y < grid.length; y++) {
-      for (let x = 0; x < grid[y].length; x++) {
-        if (grid[y][x] === 1) {
-          let px = x * spacing + xOffset;
-          let py = y * spacing - 50;
-          points.push(new Point(px, py));
-        }
-      }
-    }
-
-    xOffset += grid[0].length * spacing + letterSpacing;
-  }
-}
-
-// =========================
-// FONT (ÖRNEK - TAMAMINI EKLE)
-// =========================
-const font = {
+const letterData = {
   a: [
     [1, 0, 1, 1, 1, 1, 0, 0, 0, 0],
     [0, 0, 0, 1, 1, 1, 1, 0, 0, 0],
@@ -454,5 +496,4 @@ const font = {
     [1, 1, 1, 0, 0, 1, 1, 1, 0, 0],
     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
   ],
-
 };
