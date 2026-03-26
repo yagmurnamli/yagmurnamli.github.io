@@ -1,6 +1,5 @@
 let metaballShader;
 let balls = [];
-
 let typedText = "hello";
 
 let originX = 100;
@@ -10,12 +9,9 @@ let gap = 4;
 let letterSpacing = 140;
 
 const MAX_BALLS = 128;
-
-// --- STATE ---
-let mode = "pulse"; // "pulse" | "scatter"
+let scattered = false;
 
 // --- SHADER ---
-
 const vert = `
 attribute vec3 aPosition;
 uniform float width;
@@ -47,28 +43,27 @@ void main() {
     float dx = xs[i] - vPos.x;
     float dy = ys[i] - vPos.y;
     float d = length(vec2(dx, dy));
-    sum += (rs[i] * 0.2) / (d*d + 1.0);
+    sum += (rs[i]*0.1)/(d*d + 10.0); // daha yumuşak etki
   }
 
-  if (sum > 20.0) {
-    gl_FragColor = vec4(0.4, 0.0, 0.0, 0.9);
+  float threshold = 3.0;
+  if (sum > threshold) {
+    gl_FragColor = vec4(0.4,0.0,0.0,0.9);
   } else {
-    float smoothness = 0.5 - smoothstep(0.0, 1.5, abs(sum - 11.0));
-    vec3 color = mix(vec3(0.0), vec3(0.4, 0.0, 0.0), smoothness);
-    gl_FragColor = vec4(color, 1.0);
+    float smoothness = 0.5 - smoothstep(0.0, 1.5, abs(sum - threshold));
+    vec3 color = mix(vec3(0.0), vec3(0.4,0.0,0.0), smoothness);
+    gl_FragColor = vec4(color,1.0);
   }
 }
 `;
 
 // --- SETUP ---
-
 function setup() {
   createCanvas(window.innerWidth, window.innerHeight, WEBGL);
   noStroke();
 
   metaballShader = createShader(vert, frag);
   shader(metaballShader);
-
   metaballShader.setUniform("width", width);
   metaballShader.setUniform("height", height);
 
@@ -76,7 +71,6 @@ function setup() {
 }
 
 // --- DRAW ---
-
 function draw() {
   background(0);
 
@@ -87,14 +81,16 @@ function draw() {
   for (let i = 0; i < min(balls.length, MAX_BALLS); i++) {
     xs[i] = balls[i].x;
     ys[i] = balls[i].y;
-    rs[i] = balls[i].r;
+
+    // pulsing effect
+    rs[i] = balls[i].r * (0.9 + 0.1 * sin(frameCount * 0.1 + i));
   }
 
   metaballShader.setUniform("xs", xs);
   metaballShader.setUniform("ys", ys);
   metaballShader.setUniform("rs", rs);
 
-  quad(-1, -1, 1, -1, 1, 1, -1, 1);
+  quad(-1,-1,1,-1,1,1,-1,1);
 
   for (let b of balls) {
     b.update();
@@ -102,7 +98,6 @@ function draw() {
 }
 
 // --- WORD GENERATION ---
-
 function generateWord(word) {
   balls = [];
 
@@ -115,9 +110,8 @@ function generateWord(word) {
     for (let i = 0; i < letter.length; i++) {
       for (let j = 0; j < letter[i].length; j++) {
         if (letter[i][j] === 1) {
-          let x = originX + j * (cellSize + gap) + k * letterSpacing;
-          let y = height - (originY + i * (cellSize + gap));
-
+          let x = originX + j*(cellSize + gap) + k*letterSpacing;
+          let y = height - (originY + i*(cellSize + gap));
           balls.push(new Ball(x, y));
         }
       }
@@ -126,70 +120,63 @@ function generateWord(word) {
 }
 
 // --- INPUT ---
-
 function keyTyped() {
-  if (key === ' ') {
-    typedText += " ";
-  } else if (/[a-z]/.test(key)) {
-    typedText += key;
-  }
-
+  if (key === ' ') typedText += " ";
+  else if (/[a-z]/.test(key)) typedText += key;
   generateWord(typedText);
 }
 
 function keyPressed() {
   if (keyCode === BACKSPACE) {
-    typedText = typedText.slice(0, -1);
+    typedText = typedText.slice(0,-1);
     generateWord(typedText);
   }
-
   if (keyCode === ENTER) {
-    mode = "scatter"; // ENTER ile toplar dağılacak
+    scattered = true;
+    for (let b of balls) {
+      b.scatter();
+    }
   }
 }
 
 // --- RESIZE ---
-
 function windowResized() {
   resizeCanvas(window.innerWidth, window.innerHeight);
 }
 
 // --- BALL CLASS ---
-
 class Ball {
   constructor(x, y) {
     this.x = x;
     this.y = y;
+    this.originX = x;
+    this.originY = y;
 
-    let angle = random(TWO_PI);
-    let speed = 2;
-
-    this.vx = cos(angle) * speed;
-    this.vy = sin(angle) * speed;
-
-    this.baseR = random(8, 15); // pulsing için temel yarıçap
-    this.r = this.baseR;
-    this.phase = random(TWO_PI); // pulsing fazı
+    this.vx = 0;
+    this.vy = 0;
+    this.r = random(10,18);
   }
 
   update() {
-    if (mode === "pulse") {
-      // sadece radius değişir
-      this.r = this.baseR + sin(frameCount * 0.1 + this.phase) * 5;
-      return;
-    }
-
-    if (mode === "scatter") {
-      // hareket
+    if (scattered) {
       this.x += this.vx;
       this.y += this.vy;
 
+      // ekran sınırları
       if (this.x < 0 || this.x > width) this.vx *= -1;
       if (this.y < 0 || this.y > height) this.vy *= -1;
 
-      this.vx += random(-0.05, 0.05);
-      this.vy += random(-0.05, 0.05);
+      // hafif rastgele hareket
+      this.vx += random(-0.05,0.05);
+      this.vy += random(-0.05,0.05);
     }
+  }
+
+  scatter() {
+    let angle = random(TWO_PI);
+    let speed = random(2,5);
+    this.vx = cos(angle)*speed;
+    this.vy = sin(angle)*speed;
   }
 }
 
