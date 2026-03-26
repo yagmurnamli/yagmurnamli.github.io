@@ -44,7 +44,7 @@ void main() {
     float dx = xs[i] - vPos.x;
     float dy = ys[i] - vPos.y;
     float d = length(vec2(dx, dy));
-    sum += rs[i] / d;
+    sum += (rs[i] * 0.2) / d;
   }
 
   if (sum > 11.0) {
