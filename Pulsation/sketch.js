@@ -47,10 +47,10 @@ void main() {
     float dx = xs[i] - vPos.x;
     float dy = ys[i] - vPos.y;
     float d = length(vec2(dx, dy));
-    sum += (rs[i] * 0.4) / d;
+    sum += (rs[i] * 0.2) / (d*d + 1.0);
   }
 
-  if (sum > 11.0) {
+  if (sum > 20.0) {
     gl_FragColor = vec4(0.4, 0.0, 0.0, 0.9);
   } else {
     float smoothness = 0.5 - smoothstep(0.0, 1.5, abs(sum - 11.0));
@@ -167,7 +167,7 @@ class Ball {
     this.vx = cos(angle) * speed;
     this.vy = sin(angle) * speed;
 
-    this.baseR = random(20, 30); // pulsing için temel yarıçap
+    this.baseR = random(8, 15); // pulsing için temel yarıçap
     this.r = this.baseR;
     this.phase = random(TWO_PI); // pulsing fazı
   }
