@@ -2,10 +2,11 @@ let metaballShader;
 let balls = [];
 
 let typedText = "hello";
+let isAnimating = false;
 
 let originX = 100;
-let originY = 120;
-let cellSize = 20;
+let originY = 140;
+let cellSize = 22;
 let gap = 4;
 let letterSpacing = 140;
 
@@ -50,9 +51,9 @@ void main() {
   if (sum > 11.0) {
     gl_FragColor = vec4(0.4, 0.0, 0.0, 0.9);
   } else {
-    float smoothness = 0.5 - smoothstep(0.0, 1.5, abs(sum - 11.0));
-    vec3 color = mix(vec3(0.0), vec3(0.4, 0.0, 0.0), smoothness);
-    gl_FragColor = vec4(color, 1.0);
+    float s = 0.5 - smoothstep(0.0, 1.5, abs(sum - 11.0));
+    vec3 col = mix(vec3(0.0), vec3(0.4, 0.0, 0.0), s);
+    gl_FragColor = vec4(col, 1.0);
   }
 }
 `;
@@ -132,17 +133,24 @@ function keyTyped() {
     typedText += key;
   }
 
+  isAnimating = false;
   generateWord(typedText);
 }
 
 function keyPressed() {
-  if (keyCode === BACKSPACE) {
-    typedText = typedText.slice(0, -1);
+
+  if (keyCode === ENTER) {
+    isAnimating = true;
+  }
+
+  if (key === 'r') {
+    isAnimating = false;
     generateWord(typedText);
   }
 
-  if (keyCode === ENTER) {
-    typedText = "";
+  if (keyCode === BACKSPACE) {
+    typedText = typedText.slice(0, -1);
+    isAnimating = false;
     generateWord(typedText);
   }
 }
@@ -157,6 +165,9 @@ function windowResized() {
 
 class Ball {
   constructor(x, y) {
+    this.homeX = x;
+    this.homeY = y;
+
     this.x = x;
     this.y = y;
 
@@ -170,6 +181,15 @@ class Ball {
   }
 
   update() {
+
+    // SABİT HAL
+    if (!isAnimating) {
+      this.x += (this.homeX - this.x) * 0.1;
+      this.y += (this.homeY - this.y) * 0.1;
+      return;
+    }
+
+    // DAĞILMA
     this.x += this.vx;
     this.y += this.vy;
 
@@ -181,7 +201,7 @@ class Ball {
   }
 }
 
-// --- FULL ALPHABET (compact grid) ---
+// --- FULL ALPHABET ---
 
 const letterData = {
   a:[[0,1,1,0],[1,0,0,1],[1,1,1,1],[1,0,0,1]],
