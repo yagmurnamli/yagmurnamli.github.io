@@ -5,14 +5,15 @@ let typedText = "hello";
 
 let originX = 100;
 let originY = 120;
+
 let cellSize = 20;
 let gap = 4;
-let letterSpacing = 150;
+
+let letterGap = 60; // ⭐ HARFLER ARASI BOŞLUK (bunu değiştir)
 
 const MAX_BALLS = 128;
 
-// --- STATE ---
-let mode = "pulse"; // "pulse" | "scatter"
+let mode = "pulse";
 
 // --- SHADER ---
 
@@ -47,13 +48,16 @@ void main() {
     float dx = xs[i] - vPos.x;
     float dy = ys[i] - vPos.y;
     float d = length(vec2(dx, dy));
-    sum += (rs[i] * 0.4) / d;
+
+    sum += (rs[i] * 0.2) / (d + 5.0); // ⭐ daha stabil
   }
 
-  if (sum > 11.0) {
+  float threshold = 8.0;
+
+  if (sum > threshold) {
     gl_FragColor = vec4(0.4, 0.0, 0.0, 0.9);
   } else {
-    float smoothness = 0.5 - smoothstep(0.0, 1.5, abs(sum - 11.0));
+    float smoothness = 0.5 - smoothstep(0.0, 1.5, abs(sum - threshold));
     vec3 color = mix(vec3(0.0), vec3(0.4, 0.0, 0.0), smoothness);
     gl_FragColor = vec4(color, 1.0);
   }
@@ -63,7 +67,7 @@ void main() {
 // --- SETUP ---
 
 function setup() {
-  createCanvas(windowWidth, windowHeight);
+  createCanvas(window.innerWidth, window.innerHeight, WEBGL);
   noStroke();
 
   metaballShader = createShader(vert, frag);
@@ -108,6 +112,9 @@ function generateWord(word) {
 
   word = word.toLowerCase();
 
+  // ⭐ harf genişliği (grid: 10 sütun)
+  let letterWidth = 10 * (cellSize + gap);
+
   for (let k = 0; k < word.length; k++) {
     let letter = letterData[word[k]];
     if (!letter) continue;
@@ -115,7 +122,11 @@ function generateWord(word) {
     for (let i = 0; i < letter.length; i++) {
       for (let j = 0; j < letter[i].length; j++) {
         if (letter[i][j] === 1) {
-          let x = originX + j * (cellSize + gap) + k * letterSpacing;
+
+          let x = originX
+                + j * (cellSize + gap)
+                + k * (letterWidth + letterGap); // ⭐ BURASI ÖNEMLİ
+
           let y = height - (originY + i * (cellSize + gap));
 
           balls.push(new Ball(x, y));
@@ -128,11 +139,8 @@ function generateWord(word) {
 // --- INPUT ---
 
 function keyTyped() {
-  if (key === ' ') {
-    typedText += " ";
-  } else if (/[a-z]/.test(key)) {
-    typedText += key;
-  }
+  if (key === ' ') typedText += " ";
+  else if (/[a-z]/.test(key)) typedText += key;
 
   generateWord(typedText);
 }
@@ -144,7 +152,7 @@ function keyPressed() {
   }
 
   if (keyCode === ENTER) {
-    mode = "scatter"; // ENTER ile toplar dağılacak
+    mode = "scatter";
   }
 }
 
@@ -167,20 +175,19 @@ class Ball {
     this.vx = cos(angle) * speed;
     this.vy = sin(angle) * speed;
 
-    this.baseR = random(20, 30); // pulsing için temel yarıçap
+    this.baseR = random(15, 25);
     this.r = this.baseR;
-    this.phase = random(TWO_PI); // pulsing fazı
+    this.phase = random(TWO_PI);
   }
 
   update() {
+
     if (mode === "pulse") {
-      // sadece radius değişir
       this.r = this.baseR + sin(frameCount * 0.1 + this.phase) * 5;
       return;
     }
 
     if (mode === "scatter") {
-      // hareket
       this.x += this.vx;
       this.y += this.vy;
 
