@@ -94,7 +94,7 @@ function setup() {
   video = createCapture(VIDEO);
   video.size(160, 120);
   video.hide();
-  video.position(video.width / 2, video.height / 2);
+  video.position(video.width / 2, height - video.height / 2);
   
   // Initialize curtain positions
   cur1X = width / 2;
@@ -196,10 +196,10 @@ function draw() {
   }
 
   // Check if the label is "reach" for 3 seconds
-  if (label === "reach" && millis() - reachStartTime >= 3000 && !reachSwitched && typewriterEnded) {
+  if (label === "reach" && millis() - reachStartTime >= 3000 && !reachSwitched) {
     reachSwitched = true;
     scene4Displayed = true; // Set the boolean variable to true
-  } else if (label !== "reach" && typewriterEnded) {
+  } else if (label !== "reach") {
     // Reset timer if label is not "reach"
     reachStartTime = millis();
     reachSwitched = false;
@@ -210,10 +210,10 @@ function draw() {
     scene4();
   }
   
-  if (label === "look" && millis() - lookStartTime >= 3000 && !lookSwitched && typewriterEnded) {
+  if (label === "look" && millis() - lookStartTime >= 3000 && !lookSwitched) {
     lookSwitched = true;
     scene5Displayed = true; // Set the boolean variable to true
-  } else if (label !== "look" && typewriterEnded) {
+  } else if (label !== "look") {
     // Reset timer if label is not "reach"
     lookStartTime = millis();
     lookSwitched = false;
@@ -225,7 +225,7 @@ function draw() {
   }
 
   // Draw the video in the corner
-  image(video, video.width / 2, video.height / 2); // Position the video at the top-left corner
+  image(video, video.width / 2, height - video.height / 2); // Position the video at the top-left corner
 }
 
 // STEP 3: Get the classification!
