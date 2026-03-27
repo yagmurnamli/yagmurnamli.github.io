@@ -1,8 +1,7 @@
-/* vcd436s24 - Project (4/4): Submission
-  @yagmurnamli
-   last update: June 05
+/* @yagmurnamli
+   last update: March 27 2026
    Project Name: "BUNRAKU"
-   Explanation: A Japanese puppet, Bunraku, is holding a key, can you take it or not? An interactive experience based on Teachable Machine and player gestures.
+   Explanation: A Japanese puppet, Bunraku, is holding a key. Can you take it or not? An interactive experience based on Teachable Machine and player gestures.
 . Sources: 
 - https://www.youtube.com/watch?v=kwcillcWOg0&t=6s&ab_channel=TheCodingTrain
 - https://editor.p5js.org/codingtrain/sketches/PoZXqbu4v
@@ -95,7 +94,7 @@ function setup() {
   video = createCapture(VIDEO);
   video.size(160, 120);
   video.hide();
-  video.position((width + video.width) / 2, (height - video.height) / 2);
+  video.position(video.width / 2, height - video.height / 2);
   
   // Initialize curtain positions
   cur1X = width / 2;
