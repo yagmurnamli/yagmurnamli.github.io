@@ -225,7 +225,7 @@ function draw() {
   }
 
   // Draw the video in the corner
-  image(video, 330, 250); // Position the video at the top-left corner
+  image(video, 10, 10); // Position the video at the top-left corner
 }
 
 // STEP 3: Get the classification!
