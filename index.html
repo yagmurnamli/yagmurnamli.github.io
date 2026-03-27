@@ -5,70 +5,71 @@
   <meta charset="UTF-8">
   <title>Experimental Games by VYNA</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
   <style>
     body {
       background: black;
-      font-size: 26px;
       color: #e8e6e6;
       font-family: 'PerfectDOSVGA', monospace;
+      margin: 0;
+      padding-top: 150px;
+
+      display: flex;
+      justify-content: center;
+
+      overflow-x: hidden;
+    }
+
+    .container {
       text-align: center;
-      padding-top: 200px;
+    }
+
+    h1 {
+      margin-bottom: 40px;
     }
 
     a.game {
       display: block;
-      margin: 20px;
+      margin: 20px 0;
       font-size: 24px;
       color: #f24f2e;
       text-decoration: none;
       position: relative;
-      cursor: pointer;
     }
 
     a.game:hover {
       color: #ffa500;
     }
 
-    /* Tooltip stili */
-    a.game span.tooltip {
-      visibility: hidden;
-      width: 300px;
-      background-color: #111;
-      border: 2px solid #f24f2e;
-      color: #f24f2e;
-      font-family: 'PerfectDOSVGA', monospace;
-      font-size: 16px;
-      text-align: left;
-      padding: 10px;
-      border-radius: 0;
-      line-height: 1.4;
+    /* TOOLTIP */
+    .tooltip {
       position: absolute;
       top: 50%;
-      left: 105%; /* varsayılan sağ taraf */
-      transform: translateY(-50%) translateX(0);
-      z-index: 10;
+      left: 100%;
+      margin-left: 15px;
+
+      width: 260px;
+      padding: 10px;
+
+      background: #111;
+      border: 2px solid #f24f2e;
+      color: #f24f2e;
+      font-size: 16px;
+      line-height: 1.4;
+      text-align: left;
+
+      transform: translateY(-50%);
+
       opacity: 0;
-      transition: opacity 0.3s, transform 0.3s;
-      white-space: normal;
+      visibility: hidden;
+      transition: opacity 0.25s ease;
+
+      pointer-events: none;
     }
 
-    /* Hover efekti */
-    a.game:hover span.tooltip {
-      visibility: visible;
+    a.game:hover .tooltip {
       opacity: 1;
-      transform: translateY(-50%) translateX(5px);
-    }
-
-    /* Responsive: sağa sığmazsa sol tarafa geç */
-    @media (max-width: 700px) {
-      a.game span.tooltip {
-        left: auto;
-        right: 105%;
-        transform: translateY(-50%) translateX(0);
-      }
-      a.game:hover span.tooltip {
-        transform: translateY(-50%) translateX(-5px);
-      }
+      visibility: visible;
     }
 
     @font-face {
@@ -77,32 +78,35 @@
     }
   </style>
 </head>
+
 <body>
-  <h1>Experimental Games by VYNA</h1>
+  <div class="container">
+    <h1>Experimental Games by VYNA</h1>
 
-  <a href="BUNRAKU/index.html" class="game">
-    BUNRAKU
-    <span class="tooltip">Hint: After the puppet talks, try to reach for the camera, look closer, or hold still.</span>
-  </a>
+    <a href="BUNRAKU/index.html" class="game">
+      BUNRAKU
+      <span class="tooltip">Hint: After the puppet talks, try to reach for the camera, look closer, or hold still.</span>
+    </a>
 
-  <a href="theMaze/index.html" class="game">
-    THE MAZE
-    <span class="tooltip">Progress through the story to see the final booklet. Tip: There are multiple possible endings.</span>
-  </a>
+    <a href="theMaze/index.html" class="game">
+      THE MAZE
+      <span class="tooltip">Progress through the story to see the final booklet. Tip: There are multiple possible endings.</span>
+    </a>
 
-  <a href="What's In My Backyard/index.html" class="game">
-    WHAT'S IN MY BACKYARD?
-    <span class="tooltip">Click on the circles to progress through the scenes.</span>
-  </a>
+    <a href="What's In My Backyard/index.html" class="game">
+      WHAT'S IN MY BACKYARD?
+      <span class="tooltip">Click on the circles to progress through the scenes.</span>
+    </a>
 
-  <a href="Mask/index.html" class="game">
-    MASK (BUNRAKU PROTOTYPE VERSION)
-    <span class="tooltip">Hover or click on the mask.</span>
-  </a>
+    <a href="Mask/index.html" class="game">
+      MASK (BUNRAKU PROTOTYPE VERSION)
+      <span class="tooltip">Hover or click on the mask.</span>
+    </a>
 
-  <a href="Pulsation/index.html" class="game">
-    PULSATION (EXPERIMENTAL TYPEFACE)
-    <span class="tooltip">Write letters(KEYBOARD), delete(BACKSPACE), or finalize(ENTER).</span>
-  </a>
+    <a href="Pulsation/index.html" class="game">
+      PULSATION (EXPERIMENTAL TYPEFACE)
+      <span class="tooltip">Write letters (keyboard), delete (backspace), or finalize (enter).</span>
+    </a>
+  </div>
 </body>
 </html>
