@@ -9,7 +9,7 @@ let cellSize = 20;
 let gap = 4;
 let letterSpacing = 200;
 
-const MAX_BALLS = 256;
+const MAX_BALLS = 512;
 
 // --- STATE ---
 let mode = "pulse"; // "pulse" | "scatter"
@@ -32,7 +32,7 @@ void main() {
 const frag = `
 precision highp float;
 
-#define BALLS 256
+#define BALLS 512
 
 uniform float xs[BALLS];
 uniform float ys[BALLS];
