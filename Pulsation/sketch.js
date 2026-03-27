@@ -63,7 +63,7 @@ void main() {
 // --- SETUP ---
 
 function setup() {
-  createCanvas(window.innerWidth, window.innerHeight, WEBGL);
+  createCanvas(windowWidth, windowHeight);
   noStroke();
 
   metaballShader = createShader(vert, frag);
