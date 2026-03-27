@@ -7,7 +7,7 @@ let originX = 100;
 let originY = 120;
 let cellSize = 20;
 let gap = 4;
-let letterSpacing = 200;
+let letterSpacing = 300;
 
 const MAX_BALLS = 128;
 
