@@ -6,21 +6,103 @@
   <title>Experimental Games by VYNA</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
-    body { background: black; font-size: 26px; color: #e8e6e6; font-family: 'PerfectDOSVGA', monospace; text-align: center; padding-top: 200px; }
-    a { display: block; margin: 20px; font-size: 24px; color: #f24f2e; text-decoration: none; }
-    a:hover { color: #ffa500; }
+    body {
+      background: black;
+      font-size: 26px;
+      color: #e8e6e6;
+      font-family: 'PerfectDOSVGA', monospace;
+      text-align: center;
+      padding-top: 200px;
+    }
+
+    a.game {
+      display: inline-block;
+      margin: 20px;
+      font-size: 24px;
+      color: #f24f2e;
+      text-decoration: none;
+      position: relative;
+      cursor: pointer;
+    }
+
+    a.game:hover {
+      color: #ffa500;
+    }
+
+    /* Tooltip stili */
+    a.game span.tooltip {
+      visibility: hidden;
+      width: 300px;
+      background-color: #111;
+      border: 2px solid #f24f2e;
+      color: #f24f2e;
+      font-family: 'PerfectDOSVGA', monospace;
+      font-size: 16px;
+      text-align: left;
+      padding: 10px;
+      border-radius: 0;
+      line-height: 1.4;
+      position: absolute;
+      top: 50%;
+      left: 105%; /* varsayılan sağ taraf */
+      transform: translateY(-50%) translateX(0);
+      z-index: 10;
+      opacity: 0;
+      transition: opacity 0.3s, transform 0.3s;
+      white-space: normal;
+    }
+
+    /* Hover efekti */
+    a.game:hover span.tooltip {
+      visibility: visible;
+      opacity: 1;
+      transform: translateY(-50%) translateX(5px);
+    }
+
+    /* Responsive: sağa sığmazsa sol tarafa geç */
+    @media (max-width: 700px) {
+      a.game span.tooltip {
+        left: auto;
+        right: 105%;
+        transform: translateY(-50%) translateX(0);
+      }
+      a.game:hover span.tooltip {
+        transform: translateY(-50%) translateX(-5px);
+      }
+    }
+
     @font-face {
-  font-family: 'PerfectDOSVGA';
-  src: url('font/PerfectDOSVGA.ttf') format('truetype');
-}
+      font-family: 'PerfectDOSVGA';
+      src: url('font/PerfectDOSVGA.ttf') format('truetype');
+    }
   </style>
 </head>
 <body>
   <h1>Experimental Games by VYNA</h1>
-  <a href="BUNRAKU/index.html">BUNRAKU</a>
-  <a href="theMaze/index.html">THE MAZE</a>
-  <a href="What's In My Backyard/index.html">WHAT'S IN MY BACKYARD?</a>
-  <a href="Mask/index.html">MASK (BUNRAKU PROTOTYPE VERSION)</a>
-  <a href="Pulsation/index.html">PULSATION (EXPERIMENTAL TYPEFACE)</a>
+
+  <a href="BUNRAKU/index.html" class="game">
+    BUNRAKU
+    <span class="tooltip">BUNRAKU is a stylized narrative game about exploring surreal spaces and fragmented stories in a neon-lit world.</span>
+  </a>
+
+  <a href="theMaze/index.html" class="game">
+    THE MAZE
+    <span class="tooltip">THE MAZE challenges your spatial awareness through increasingly complex puzzles in a minimalist digital labyrinth.</span>
+  </a>
+
+  <a href="What's In My Backyard/index.html" class="game">
+    WHAT'S IN MY BACKYARD?
+    <span class="tooltip">Discover hidden stories and secrets in a backyard environment full of surreal surprises and playful experiments.</span>
+  </a>
+
+  <a href="Mask/index.html" class="game">
+    MASK (BUNRAKU PROTOTYPE VERSION)
+    <span class="tooltip">A prototype continuation of BUNRAKU focusing on identity, masks, and perception in abstract interactive spaces.</span>
+  </a>
+
+  <a href="Pulsation/index.html" class="game">
+    PULSATION (EXPERIMENTAL TYPEFACE)
+    <span class="tooltip">An experimental typeface game that visualizes rhythm and pulsation in a dynamic textual interface.</span>
+  </a>
 </body>
 </html>
